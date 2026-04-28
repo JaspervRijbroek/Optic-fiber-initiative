@@ -1,0 +1,26 @@
+# Cloudflare Pages + Workers configuration
+# https://developers.cloudflare.com/pages/
+
+name = "fibra-optica-iniciativa"
+pages_build_output_dir = "."   # static files served from the repo root
+
+# ── D1 database binding ────────────────────────────────────────────────────────
+# After creating the database with:
+#   wrangler d1 create fibra-optica-db
+# replace <DATABASE_ID> with the ID printed by the command above.
+
+[[d1_databases]]
+binding  = "DB"
+database_name = "fibra-optica-db"
+database_id   = "<DATABASE_ID>"
+
+# ── Environment variables ──────────────────────────────────────────────────────
+# EXPORT_SECRET is intentionally NOT stored here in plain text.
+# Set it as an encrypted secret in the Cloudflare Pages dashboard:
+#   Settings → Environment variables → Production → Add variable
+#   Name:  EXPORT_SECRET
+#   Value: <a long random string, e.g. output of: openssl rand -hex 32>
+#
+# You may add a [vars] section for non-sensitive variables, e.g.:
+# [vars]
+# SITE_NAME = "Fibra Óptica Iniciativa"
