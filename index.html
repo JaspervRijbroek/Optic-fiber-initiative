@@ -164,9 +164,42 @@
       font-size: 0.75rem;
       color: #90a4ae;
     }
+
+    /* ── Navigation menu ── */
+    nav {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto 1rem;
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    nav a {
+      padding: 0.45rem 1.1rem;
+      border-radius: 2rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: #1a237e;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    nav a:hover,
+    nav a.active {
+      background: #1a237e;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
+
+<nav aria-label="Menú principal">
+  <a href="index.html" class="active">Inicio</a>
+  <a href="info.html">Información</a>
+</nav>
 
 <div class="card">
 
