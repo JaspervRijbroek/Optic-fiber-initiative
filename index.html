@@ -4,210 +4,34 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Iniciativa Fibra Óptica — Regístrate</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: linear-gradient(135deg, #f0f4ff 0%, #e8f5e9 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: { DEFAULT: '#1a237e', dark: '#283593' }
+          }
+        }
+      }
     }
-
-    .card {
-      background: #fff;
-      border-radius: 1.25rem;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-      padding: 2.5rem 2rem;
-      width: 100%;
-      max-width: 480px;
-    }
-
-    .logo {
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .logo svg {
-      width: 56px;
-      height: 56px;
-    }
-
-    h1 {
-      font-size: 1.5rem;
-      color: #1a237e;
-      text-align: center;
-      margin-bottom: 0.4rem;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: #546e7a;
-      font-size: 0.95rem;
-      margin-bottom: 2rem;
-      line-height: 1.5;
-    }
-
-    label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #37474f;
-      margin-bottom: 0.35rem;
-    }
-
-    .field {
-      margin-bottom: 1.25rem;
-    }
-
-    input {
-      width: 100%;
-      padding: 0.65rem 0.85rem;
-      border: 1.5px solid #cfd8dc;
-      border-radius: 0.6rem;
-      font-size: 1rem;
-      color: #263238;
-      transition: border-color 0.2s;
-      outline: none;
-    }
-
-    input:focus {
-      border-color: #1a237e;
-      box-shadow: 0 0 0 3px rgba(26,35,126,0.1);
-    }
-
-    input.error-input {
-      border-color: #e53935;
-    }
-
-    .field-hint {
-      font-size: 0.78rem;
-      color: #78909c;
-      margin-top: 0.25rem;
-    }
-
-    .error-msg {
-      font-size: 0.82rem;
-      color: #e53935;
-      margin-top: 0.3rem;
-      display: none;
-    }
-
-    .error-msg.visible { display: block; }
-
-    button[type="submit"] {
-      width: 100%;
-      padding: 0.8rem;
-      background: #1a237e;
-      color: #fff;
-      border: none;
-      border-radius: 0.6rem;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-      margin-top: 0.5rem;
-    }
-
-    button[type="submit"]:hover { background: #283593; }
-    button[type="submit"]:active { transform: scale(0.98); }
-    button[type="submit"]:disabled { background: #90a4ae; cursor: not-allowed; }
-
-    .server-error {
-      background: #ffebee;
-      border: 1px solid #ef9a9a;
-      border-radius: 0.6rem;
-      padding: 0.75rem 1rem;
-      color: #c62828;
-      font-size: 0.9rem;
-      margin-bottom: 1rem;
-      display: none;
-    }
-
-    .server-error.visible { display: block; }
-
-    /* ── Thank-you screen ── */
-    #thanks {
-      display: none;
-      text-align: center;
-    }
-
-    #thanks svg {
-      width: 72px;
-      height: 72px;
-      margin-bottom: 1.25rem;
-    }
-
-    #thanks h2 {
-      font-size: 1.6rem;
-      color: #1a237e;
-      margin-bottom: 0.6rem;
-    }
-
-    #thanks p {
-      color: #546e7a;
-      line-height: 1.6;
-      font-size: 0.97rem;
-    }
-
-    #thanks .name-highlight {
-      font-weight: 700;
-      color: #1a237e;
-    }
-
-    .footer-note {
-      margin-top: 2rem;
-      text-align: center;
-      font-size: 0.75rem;
-      color: #90a4ae;
-    }
-
-    /* ── Navigation menu ── */
-    nav {
-      width: 100%;
-      max-width: 480px;
-      margin: 0 auto 1rem;
-      display: flex;
-      gap: 0.5rem;
-      justify-content: center;
-    }
-
-    nav a {
-      padding: 0.45rem 1.1rem;
-      border-radius: 2rem;
-      font-size: 0.9rem;
-      font-weight: 600;
-      text-decoration: none;
-      color: #1a237e;
-      background: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      transition: background 0.2s, color 0.2s;
-    }
-
-    nav a:hover,
-    nav a.active {
-      background: #1a237e;
-      color: #fff;
-    }
-  </style>
+  </script>
+  <!-- Cloudflare Turnstile -->
+  <script src="https://challenges.cloudflare.com/turnstile/v1/api.js" async defer></script>
 </head>
-<body>
+<body class="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-blue-50 to-green-50 font-[system-ui,sans-serif]">
 
-<nav aria-label="Menú principal">
-  <a href="index.html" class="active">Inicio</a>
-  <a href="info.html">Información</a>
+<nav aria-label="Menú principal" class="flex gap-2 justify-center w-full max-w-md mx-auto mb-4">
+  <a href="index.html" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline bg-[#1a237e] text-white shadow-sm">Inicio</a>
+  <a href="info.html" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline text-[#1a237e] bg-white shadow-sm transition-colors hover:bg-[#1a237e] hover:text-white">Información</a>
 </nav>
 
-<div class="card">
+<div class="bg-white rounded-2xl shadow-2xl p-8 sm:p-10 w-full max-w-md">
 
   <!-- Signup form -->
   <div id="form-section">
-    <div class="logo" aria-hidden="true">
-      <!-- Fiber-optic / network icon -->
-      <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div class="flex justify-center mb-6" aria-hidden="true">
+      <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="28" cy="28" r="28" fill="#e8eaf6"/>
         <path d="M14 28 Q21 14 28 28 Q35 42 42 28" stroke="#1a237e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
         <path d="M14 22 Q21 8 28 22 Q35 36 42 22" stroke="#3949ab" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>
@@ -217,18 +41,20 @@
       </svg>
     </div>
 
-    <h1>Fibra Óptica en tu Zona</h1>
-    <p class="subtitle">
+    <h1 class="text-2xl font-bold text-[#1a237e] text-center mb-1">Fibra Óptica en tu Zona</h1>
+    <p class="text-center text-slate-500 text-sm mb-8 leading-relaxed">
       Regístrate para mostrar tu interés en recibir fibra óptica.<br>
       Cuantos más vecinos se registren, ¡antes llegará!
     </p>
 
-    <div id="server-error" class="server-error" role="alert"></div>
+    <div id="server-error" class="hidden bg-red-50 border border-red-300 rounded-lg px-4 py-3 text-red-700 text-sm mb-4" role="alert"></div>
 
     <form id="signup-form" novalidate>
 
-      <div class="field">
-        <label for="nombre">Nombre completo <span aria-hidden="true">*</span></label>
+      <div class="mb-5">
+        <label for="nombre" class="block text-xs font-semibold text-slate-600 mb-1">
+          Nombre completo <span aria-hidden="true">*</span>
+        </label>
         <input
           type="text"
           id="nombre"
@@ -236,26 +62,31 @@
           placeholder="Ej. María García López"
           autocomplete="name"
           required
+          class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base text-slate-800 outline-none transition-colors focus:border-[#1a237e] focus:ring-2 focus:ring-[#1a237e]/10"
         />
-        <span class="error-msg" id="nombre-error">Por favor, introduce tu nombre completo.</span>
+        <span class="hidden text-xs text-red-600 mt-1 block" id="nombre-error">Por favor, introduce tu nombre completo.</span>
       </div>
 
-      <div class="field">
-        <label for="contacto">Correo electrónico o teléfono <span aria-hidden="true">*</span></label>
+      <div class="mb-5">
+        <label for="email" class="block text-xs font-semibold text-slate-600 mb-1">
+          Correo electrónico <span aria-hidden="true">*</span>
+        </label>
         <input
-          type="text"
-          id="contacto"
-          name="contacto"
-          placeholder="Ej. maria@email.com o 612 345 678"
+          type="email"
+          id="email"
+          name="email"
+          placeholder="Ej. maria@email.com"
           autocomplete="email"
           required
+          class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base text-slate-800 outline-none transition-colors focus:border-[#1a237e] focus:ring-2 focus:ring-[#1a237e]/10"
         />
-        <p class="field-hint">Introduce tu correo electrónico o número de teléfono.</p>
-        <span class="error-msg" id="contacto-error">Por favor, introduce un correo electrónico o número de teléfono válido.</span>
+        <span class="hidden text-xs text-red-600 mt-1 block" id="email-error">Por favor, introduce un correo electrónico válido.</span>
       </div>
 
-      <div class="field">
-        <label for="cru">CRU (Código de Referencia Único) <span aria-hidden="true">*</span></label>
+      <div class="mb-5">
+        <label for="cru" class="block text-xs font-semibold text-slate-600 mb-1">
+          CRU (Código de Referencia Único) <span aria-hidden="true">*</span>
+        </label>
         <input
           type="text"
           id="cru"
@@ -263,39 +94,53 @@
           placeholder="Ej. ES0031415927182A1FA"
           autocomplete="off"
           required
+          class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base text-slate-800 outline-none transition-colors focus:border-[#1a237e] focus:ring-2 focus:ring-[#1a237e]/10"
         />
-        <p class="field-hint">Encuéntralo en tu factura de electricidad o gas. Es el identificador único de tu punto de suministro.</p>
-        <span class="error-msg" id="cru-error">Por favor, introduce tu código CRU.</span>
+        <p class="text-xs text-slate-400 mt-1">Encuéntralo en tu factura de electricidad o gas. Es el identificador único de tu punto de suministro.</p>
+        <span class="hidden text-xs text-red-600 mt-1 block" id="cru-error">Por favor, introduce tu código CRU.</span>
       </div>
 
-      <div id="cru-duplicate-error" class="server-error" role="alert" style="display:none;">
+      <div id="cru-duplicate-error" class="hidden bg-red-50 border border-red-300 rounded-lg px-4 py-3 text-red-700 text-sm mb-4" role="alert">
         Este CRU ya ha sido registrado. Si crees que es un error, contacta con nosotros.
       </div>
 
-      <button type="submit" id="submit-btn">Registrar mi interés</button>
+      <!-- Cloudflare Turnstile widget                                     -->
+      <!-- Replace YOUR_SITE_KEY with the site key from the Cloudflare     -->
+      <!-- Turnstile dashboard (Turnstile → your widget → Site key).       -->
+      <div class="mb-5 flex justify-center">
+        <div class="cf-turnstile" data-sitekey="YOUR_SITE_KEY" data-theme="light"></div>
+      </div>
+
+      <button
+        type="submit"
+        id="submit-btn"
+        class="w-full py-3 bg-[#1a237e] text-white rounded-lg text-base font-semibold cursor-pointer transition-colors mt-2 hover:bg-[#283593] active:scale-[0.98] disabled:bg-slate-400 disabled:cursor-not-allowed"
+      >
+        Registrar mi interés
+      </button>
 
     </form>
 
-    <p class="footer-note">
+    <p class="mt-8 text-center text-xs text-slate-400">
       Tus datos únicamente se utilizarán para medir el interés en fibra óptica en tu zona<br>
       y serán compartidos con la empresa instaladora responsable del proyecto.
     </p>
   </div>
 
   <!-- Thank-you screen (hidden until form is submitted) -->
-  <div id="thanks" role="status" aria-live="polite">
-    <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <div id="thanks" class="hidden text-center" role="status" aria-live="polite">
+    <svg class="w-20 h-20 mx-auto mb-5" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <circle cx="36" cy="36" r="36" fill="#e8f5e9"/>
       <path d="M22 36 l10 10 l18-20" stroke="#2e7d32" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    <h2>¡Gracias por registrarte!</h2>
-    <p>
-      Hola, <span class="name-highlight" id="thanks-name"></span>.<br><br>
+    <h2 class="text-2xl font-bold text-[#1a237e] mb-2">¡Gracias por registrarte!</h2>
+    <p class="text-slate-500 leading-relaxed text-sm">
+      Hola, <span class="font-bold text-[#1a237e]" id="thanks-name"></span>.<br><br>
       Hemos recibido tu interés en recibir fibra óptica en tu zona.
       Cuantas más personas se registren, más rápido podremos avanzar con la instalación.
-      Te contactaremos cuando haya novedades.
+      Te hemos enviado un correo de confirmación y te contactaremos cuando haya novedades.
     </p>
-    <p class="footer-note" style="margin-top:1.5rem;">
+    <p class="mt-6 text-xs text-slate-400">
       ¿Conoces a alguien más que quiera fibra óptica? ¡Comparte esta página!
     </p>
   </div>
@@ -306,40 +151,40 @@
   (function () {
     'use strict';
 
-    // ── Helpers ──────────────────────────────────────────────
     const $ = (id) => document.getElementById(id);
 
     function isValidEmail(val) {
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
     }
 
-    function isValidPhone(val) {
-      // Require at least 7 digits; allow spaces, dashes, plus sign (Spanish-style)
-      return /^(?=(?:.*\d){7})[\d\s\-\+]{7,15}$/.test(val.trim());
-    }
-
     function setError(inputId, show) {
       const input = $(inputId);
       const errEl = $(inputId + '-error');
       if (!input || !errEl) return;
-      input.classList.toggle('error-input', show);
-      errEl.classList.toggle('visible', show);
+      if (show) {
+        input.classList.add('border-red-600');
+        input.classList.remove('border-slate-300');
+        errEl.classList.remove('hidden');
+      } else {
+        input.classList.remove('border-red-600');
+        input.classList.add('border-slate-300');
+        errEl.classList.add('hidden');
+      }
     }
 
     function showServerError(msg) {
       const el = $('server-error');
       el.textContent = msg;
-      el.classList.add('visible');
+      el.classList.remove('hidden');
     }
 
     function hideServerError() {
       const el = $('server-error');
       el.textContent = '';
-      el.classList.remove('visible');
+      el.classList.add('hidden');
     }
 
-    // ── Form validation ───────────────────────────────────────
-    function validate(nombre, contacto, cru) {
+    function validate(nombre, email, cru) {
       let ok = true;
 
       if (!nombre.trim()) {
@@ -349,12 +194,11 @@
         setError('nombre', false);
       }
 
-      const contactoTrimmed = contacto.trim();
-      if (!contactoTrimmed || (!isValidEmail(contactoTrimmed) && !isValidPhone(contactoTrimmed))) {
-        setError('contacto', true);
+      if (!email.trim() || !isValidEmail(email)) {
+        setError('email', true);
         ok = false;
       } else {
-        setError('contacto', false);
+        setError('email', false);
       }
 
       if (!cru.trim()) {
@@ -367,18 +211,18 @@
       return ok;
     }
 
-    // ── Submit handler ────────────────────────────────────────
     $('signup-form').addEventListener('submit', async function (e) {
       e.preventDefault();
 
-      const nombre   = $('nombre').value;
-      const contacto = $('contacto').value;
-      const cru      = $('cru').value;
+      const nombre         = $('nombre').value;
+      const email          = $('email').value;
+      const cru            = $('cru').value;
+      const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value || '';
 
       hideServerError();
-      $('cru-duplicate-error').style.display = 'none';
+      $('cru-duplicate-error').classList.add('hidden');
 
-      if (!validate(nombre, contacto, cru)) return;
+      if (!validate(nombre, email, cru)) return;
 
       const btn = $('submit-btn');
       btn.disabled = true;
@@ -390,22 +234,21 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             nombre: nombre.trim(),
-            contacto: contacto.trim(),
-            cru: cru.trim().toUpperCase()
+            email: email.trim(),
+            cru: cru.trim().toUpperCase(),
+            turnstileToken,
           })
         });
 
         if (res.ok) {
-          // Show thank-you screen
-          $('form-section').style.display = 'none';
-          const thanksEl = $('thanks');
-          thanksEl.style.display = 'block';
+          $('form-section').classList.add('hidden');
+          $('thanks').classList.remove('hidden');
           $('thanks-name').textContent = nombre.trim().split(' ')[0];
         } else {
           const data = await res.json().catch(() => ({}));
 
           if (res.status === 409) {
-            $('cru-duplicate-error').style.display = 'block';
+            $('cru-duplicate-error').classList.remove('hidden');
           } else {
             showServerError(
               data.error ||
@@ -427,3 +270,4 @@
 
 </body>
 </html>
+

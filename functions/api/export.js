@@ -58,7 +58,7 @@ export async function onRequestGet({ request, env }) {
   let results;
   try {
     const stmt = await env.DB
-      .prepare('SELECT id, nombre, contacto, cru, created_at FROM registrations ORDER BY created_at ASC')
+      .prepare('SELECT id, nombre, email, cru, created_at FROM registrations ORDER BY created_at ASC')
       .all();
     results = stmt.results;
   } catch (err) {
@@ -70,9 +70,9 @@ export async function onRequestGet({ request, env }) {
   }
 
   // ── Build CSV ────────────────────────────────────────────────
-  const header = ['ID', 'Nombre', 'Contacto', 'CRU', 'Fecha de Registro'].map(csvField).join(',');
+  const header = ['ID', 'Nombre', 'Email', 'CRU', 'Fecha de Registro'].map(csvField).join(',');
   const rows = results.map((row) =>
-    [row.id, row.nombre, row.contacto, row.cru, row.created_at].map(csvField).join(',')
+    [row.id, row.nombre, row.email, row.cru, row.created_at].map(csvField).join(',')
   );
 
   const csv = [header, ...rows].join('\r\n');

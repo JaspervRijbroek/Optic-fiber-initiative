@@ -4,140 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Información — Iniciativa Fibra Óptica</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: linear-gradient(135deg, #f0f4ff 0%, #e8f5e9 100%);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 1.5rem;
-    }
-
-    /* ── Navigation menu ── */
-    nav {
-      width: 100%;
-      max-width: 640px;
-      margin: 0 auto 1rem;
-      display: flex;
-      gap: 0.5rem;
-      justify-content: center;
-    }
-
-    nav a {
-      padding: 0.45rem 1.1rem;
-      border-radius: 2rem;
-      font-size: 0.9rem;
-      font-weight: 600;
-      text-decoration: none;
-      color: #1a237e;
-      background: #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      transition: background 0.2s, color 0.2s;
-    }
-
-    nav a:hover,
-    nav a.active {
-      background: #1a237e;
-      color: #fff;
-    }
-
-    .card {
-      background: #fff;
-      border-radius: 1.25rem;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-      padding: 2.5rem 2rem;
-      width: 100%;
-      max-width: 640px;
-    }
-
-    .logo {
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .logo svg {
-      width: 56px;
-      height: 56px;
-    }
-
-    h1 {
-      font-size: 1.5rem;
-      color: #1a237e;
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-
-    h2 {
-      font-size: 1.1rem;
-      color: #1a237e;
-      margin-bottom: 0.6rem;
-      margin-top: 1.5rem;
-    }
-
-    p {
-      color: #546e7a;
-      font-size: 0.95rem;
-      line-height: 1.7;
-    }
-
-    .info-section {
-      border-left: 4px solid #e8eaf6;
-      padding-left: 1rem;
-      margin-top: 1.25rem;
-    }
-
-    .highlight-box {
-      background: #e8eaf6;
-      border-radius: 0.75rem;
-      padding: 1rem 1.25rem;
-      margin-top: 1.5rem;
-    }
-
-    .highlight-box p {
-      color: #1a237e;
-      font-size: 0.93rem;
-    }
-
-    .footer-note {
-      margin-top: 2rem;
-      text-align: center;
-      font-size: 0.75rem;
-      color: #90a4ae;
-    }
-
-    .cta {
-      display: inline-block;
-      margin-top: 1.75rem;
-      padding: 0.75rem 1.75rem;
-      background: #1a237e;
-      color: #fff;
-      border-radius: 0.6rem;
-      font-size: 1rem;
-      font-weight: 600;
-      text-decoration: none;
-      text-align: center;
-      width: 100%;
-      transition: background 0.2s;
-    }
-
-    .cta:hover { background: #283593; }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="min-h-screen flex flex-col items-center p-6 bg-gradient-to-br from-blue-50 to-green-50 font-[system-ui,sans-serif]">
 
-<nav aria-label="Menú principal">
-  <a href="index.html">Inicio</a>
-  <a href="info.html" class="active">Información</a>
+<nav aria-label="Menú principal" class="flex gap-2 justify-center w-full max-w-xl mx-auto mb-4">
+  <a href="index.html" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline text-[#1a237e] bg-white shadow-sm transition-colors hover:bg-[#1a237e] hover:text-white">Inicio</a>
+  <a href="info.html" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline bg-[#1a237e] text-white shadow-sm">Información</a>
 </nav>
 
-<div class="card">
+<div class="bg-white rounded-2xl shadow-2xl p-8 sm:p-10 w-full max-w-xl">
 
-  <div class="logo" aria-hidden="true">
-    <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <div class="flex justify-center mb-6" aria-hidden="true">
+    <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="28" cy="28" r="28" fill="#e8eaf6"/>
       <path d="M14 28 Q21 14 28 28 Q35 42 42 28" stroke="#1a237e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
       <path d="M14 22 Q21 8 28 22 Q35 36 42 22" stroke="#3949ab" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>
@@ -147,21 +26,21 @@
     </svg>
   </div>
 
-  <h1>¿Cómo funciona esta iniciativa?</h1>
+  <h1 class="text-2xl font-bold text-[#1a237e] text-center mb-6">¿Cómo funciona esta iniciativa?</h1>
 
-  <div class="info-section">
-    <h2>¿Qué hacemos con tu registro?</h2>
-    <p>
-      Cuando te registras en esta plataforma, tu nombre, datos de contacto y
+  <div class="border-l-4 border-[#e8eaf6] pl-4 mt-5">
+    <h2 class="text-lg font-semibold text-[#1a237e] mb-2">¿Qué hacemos con tu registro?</h2>
+    <p class="text-slate-500 text-sm leading-relaxed">
+      Cuando te registras en esta plataforma, tu nombre, correo electrónico y
       código CRU quedan almacenados de forma segura. Estos datos nos permiten
       cuantificar la demanda real de fibra óptica en las partidas rurales y
       urbanizaciones dispersas de Torrent que aún no disponen de este servicio.
     </p>
   </div>
 
-  <div class="info-section">
-    <h2>¿Cuándo se envía la información a Telefónica?</h2>
-    <p>
+  <div class="border-l-4 border-[#e8eaf6] pl-4 mt-5">
+    <h2 class="text-lg font-semibold text-[#1a237e] mb-2">¿Cuándo se envía la información a Telefónica?</h2>
+    <p class="text-slate-500 text-sm leading-relaxed">
       Una vez transcurrido el periodo de recogida de interés —o cuando se
       alcance un número suficiente de registros— compilaremos todos los datos
       y los enviaremos formalmente a <strong>Telefónica</strong>.
@@ -172,9 +51,9 @@
     </p>
   </div>
 
-  <div class="info-section">
-    <h2>¿Por qué es importante tu participación?</h2>
-    <p>
+  <div class="border-l-4 border-[#e8eaf6] pl-4 mt-5">
+    <h2 class="text-lg font-semibold text-[#1a237e] mb-2">¿Por qué es importante tu participación?</h2>
+    <p class="text-slate-500 text-sm leading-relaxed">
       Las operadoras de telecomunicaciones basan sus decisiones de inversión en
       la rentabilidad esperada de cada zona. Cuantos más vecinos demuestren
       interés de forma oficial, mayor es la justificación económica para que
@@ -183,8 +62,8 @@
     </p>
   </div>
 
-  <div class="highlight-box" role="note">
-    <p>
+  <div class="bg-[#e8eaf6] rounded-xl px-5 py-4 mt-6" role="note">
+    <p class="text-[#1a237e] text-sm leading-relaxed">
       📋 <strong>Transparencia:</strong> tus datos únicamente se utilizarán para
       medir el interés colectivo y serán compartidos exclusivamente con
       Telefónica como parte de la solicitud formal de instalación de fibra óptica
@@ -193,9 +72,11 @@
     </p>
   </div>
 
-  <a href="index.html" class="cta">Registrar mi interés ahora</a>
+  <a href="index.html" class="block mt-7 py-3 px-7 bg-[#1a237e] text-white rounded-lg text-base font-semibold text-center no-underline transition-colors hover:bg-[#283593]">
+    Registrar mi interés ahora
+  </a>
 
-  <p class="footer-note">
+  <p class="mt-8 text-center text-xs text-slate-400">
     Iniciativa vecinal por la fibra óptica en las zonas dispersas de Torrent.
   </p>
 
@@ -203,3 +84,4 @@
 
 </body>
 </html>
+
