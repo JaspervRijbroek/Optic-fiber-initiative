@@ -12,7 +12,7 @@ pages_build_output_dir = "."   # static files served from the repo root
 [[d1_databases]]
 binding  = "DB"
 database_name = "fibra-optica-db"
-database_id   = "<DATABASE_ID>"
+database_id = "fb24b00e-1ffa-4792-9531-4d59e6147d9b"
 
 # ── Environment variables ──────────────────────────────────────────────────────
 # Set the following as encrypted secrets in the Cloudflare Pages dashboard:
