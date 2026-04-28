@@ -63,10 +63,13 @@ function generateToken() {
 }
 
 /** Send a confirmation email via Resend. Skipped when RESEND_API_KEY is absent. */
-async function sendConfirmationEmail(env, { nombre, email, unsubscribeToken }) {
+async function sendConfirmationEmail(env, { nombre, email, unsubscribeToken, siteUrl }) {
   if (!env.RESEND_API_KEY) return;
+  if (!env.FROM_EMAIL) {
+    console.warn('FROM_EMAIL is not configured; skipping confirmation email.');
+    return;
+  }
 
-  const siteUrl = (env.SITE_URL || '').replace(/\/$/, '');
   const unsubscribeUrl = `${siteUrl}/api/unsubscribe?token=${unsubscribeToken}`;
   const firstName = nombre.split(' ')[0];
 
@@ -115,7 +118,7 @@ async function sendConfirmationEmail(env, { nombre, email, unsubscribeToken }) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: env.FROM_EMAIL || 'Fibra Óptica Torrent <noreply@fibra-torrent.es>',
+      from: env.FROM_EMAIL,
       to: [email],
       subject: '¡Gracias por registrar tu interés en fibra óptica!',
       html,
@@ -194,7 +197,8 @@ export async function onRequestPost({ request, env }) {
   }
 
   // ── Send confirmation email (fire-and-forget) ────────────────
-  sendConfirmationEmail(env, { nombre, email, unsubscribeToken }).catch((err) => {
+  const siteUrl = (env.SITE_URL || new URL(request.url).origin).replace(/\/$/, '');
+  sendConfirmationEmail(env, { nombre, email, unsubscribeToken, siteUrl }).catch((err) => {
     console.error('Email send error:', err);
   });
 

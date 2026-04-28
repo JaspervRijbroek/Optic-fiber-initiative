@@ -58,6 +58,11 @@ export async function onRequestGet({ request, env }) {
   );
 }
 
+/**
+ * Build a simple HTML response page.
+ * NOTE: `bodyContent` must be a trusted string literal — never pass
+ * user-supplied data here as it is interpolated directly into HTML.
+ */
 function page(title, bodyContent, status = 200) {
   const html = `<!DOCTYPE html>
 <html lang="es">
