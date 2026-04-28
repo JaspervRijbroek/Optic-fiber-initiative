@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciativa Fibra Óptica — Regístrate</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #f0f4ff 0%, #e8f5e9 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 1.25rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .logo svg {
+      width: 56px;
+      height: 56px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      color: #1a237e;
+      text-align: center;
+      margin-bottom: 0.4rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #546e7a;
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #37474f;
+      margin-bottom: 0.35rem;
+    }
+
+    .field {
+      margin-bottom: 1.25rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid #cfd8dc;
+      border-radius: 0.6rem;
+      font-size: 1rem;
+      color: #263238;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #1a237e;
+      box-shadow: 0 0 0 3px rgba(26,35,126,0.1);
+    }
+
+    input.error-input {
+      border-color: #e53935;
+    }
+
+    .field-hint {
+      font-size: 0.78rem;
+      color: #78909c;
+      margin-top: 0.25rem;
+    }
+
+    .error-msg {
+      font-size: 0.82rem;
+      color: #e53935;
+      margin-top: 0.3rem;
+      display: none;
+    }
+
+    .error-msg.visible { display: block; }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 0.8rem;
+      background: #1a237e;
+      color: #fff;
+      border: none;
+      border-radius: 0.6rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 0.5rem;
+    }
+
+    button[type="submit"]:hover { background: #283593; }
+    button[type="submit"]:active { transform: scale(0.98); }
+    button[type="submit"]:disabled { background: #90a4ae; cursor: not-allowed; }
+
+    .server-error {
+      background: #ffebee;
+      border: 1px solid #ef9a9a;
+      border-radius: 0.6rem;
+      padding: 0.75rem 1rem;
+      color: #c62828;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .server-error.visible { display: block; }
+
+    /* ── Thank-you screen ── */
+    #thanks {
+      display: none;
+      text-align: center;
+    }
+
+    #thanks svg {
+      width: 72px;
+      height: 72px;
+      margin-bottom: 1.25rem;
+    }
+
+    #thanks h2 {
+      font-size: 1.6rem;
+      color: #1a237e;
+      margin-bottom: 0.6rem;
+    }
+
+    #thanks p {
+      color: #546e7a;
+      line-height: 1.6;
+      font-size: 0.97rem;
+    }
+
+    #thanks .name-highlight {
+      font-weight: 700;
+      color: #1a237e;
+    }
+
+    .footer-note {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #90a4ae;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- Signup form -->
+  <div id="form-section">
+    <div class="logo" aria-hidden="true">
+      <!-- Fiber-optic / network icon -->
+      <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="28" cy="28" r="28" fill="#e8eaf6"/>
+        <path d="M14 28 Q21 14 28 28 Q35 42 42 28" stroke="#1a237e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M14 22 Q21 8 28 22 Q35 36 42 22" stroke="#3949ab" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>
+        <path d="M14 34 Q21 20 28 34 Q35 48 42 34" stroke="#3949ab" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>
+        <circle cx="14" cy="28" r="3" fill="#1a237e"/>
+        <circle cx="42" cy="28" r="3" fill="#1a237e"/>
+      </svg>
+    </div>
+
+    <h1>Fibra Óptica en tu Zona</h1>
+    <p class="subtitle">
+      Regístrate para mostrar tu interés en recibir fibra óptica.<br>
+      Cuantos más vecinos se registren, ¡antes llegará!
+    </p>
+
+    <div id="server-error" class="server-error" role="alert"></div>
+
+    <form id="signup-form" novalidate>
+
+      <div class="field">
+        <label for="nombre">Nombre completo <span aria-hidden="true">*</span></label>
+        <input
+          type="text"
+          id="nombre"
+          name="nombre"
+          placeholder="Ej. María García López"
+          autocomplete="name"
+          required
+        />
+        <span class="error-msg" id="nombre-error">Por favor, introduce tu nombre completo.</span>
+      </div>
+
+      <div class="field">
+        <label for="contacto">Correo electrónico o teléfono <span aria-hidden="true">*</span></label>
+        <input
+          type="text"
+          id="contacto"
+          name="contacto"
+          placeholder="Ej. maria@email.com o 612 345 678"
+          autocomplete="email"
+          required
+        />
+        <p class="field-hint">Introduce tu correo electrónico o número de teléfono.</p>
+        <span class="error-msg" id="contacto-error">Por favor, introduce un correo electrónico o número de teléfono válido.</span>
+      </div>
+
+      <div class="field">
+        <label for="cru">CRU (Código de Referencia Único) <span aria-hidden="true">*</span></label>
+        <input
+          type="text"
+          id="cru"
+          name="cru"
+          placeholder="Ej. ES0031415927182A1FA"
+          autocomplete="off"
+          required
+        />
+        <p class="field-hint">Encuéntralo en tu factura de electricidad o gas. Es el identificador único de tu punto de suministro.</p>
+        <span class="error-msg" id="cru-error">Por favor, introduce tu código CRU.</span>
+      </div>
+
+      <div id="cru-duplicate-error" class="server-error" role="alert" style="display:none;">
+        Este CRU ya ha sido registrado. Si crees que es un error, contacta con nosotros.
+      </div>
+
+      <button type="submit" id="submit-btn">Registrar mi interés</button>
+
+    </form>
+
+    <p class="footer-note">
+      Tus datos únicamente se utilizarán para medir el interés en fibra óptica en tu zona<br>
+      y serán compartidos con la empresa instaladora responsable del proyecto.
+    </p>
+  </div>
+
+  <!-- Thank-you screen (hidden until form is submitted) -->
+  <div id="thanks" role="status" aria-live="polite">
+    <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="36" cy="36" r="36" fill="#e8f5e9"/>
+      <path d="M22 36 l10 10 l18-20" stroke="#2e7d32" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h2>¡Gracias por registrarte!</h2>
+    <p>
+      Hola, <span class="name-highlight" id="thanks-name"></span>.<br><br>
+      Hemos recibido tu interés en recibir fibra óptica en tu zona.
+      Cuantas más personas se registren, más rápido podremos avanzar con la instalación.
+      Te contactaremos cuando haya novedades.
+    </p>
+    <p class="footer-note" style="margin-top:1.5rem;">
+      ¿Conoces a alguien más que quiera fibra óptica? ¡Comparte esta página!
+    </p>
+  </div>
+
+</div>
+
+<script>
+  (function () {
+    'use strict';
+
+    // ── Helpers ──────────────────────────────────────────────
+    const $ = (id) => document.getElementById(id);
+
+    function isValidEmail(val) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
+    }
+
+    function isValidPhone(val) {
+      // Require at least 7 digits; allow spaces, dashes, plus sign (Spanish-style)
+      return /^(?=(?:.*\d){7})[\d\s\-\+]{7,15}$/.test(val.trim());
+    }
+
+    function setError(inputId, show) {
+      const input = $(inputId);
+      const errEl = $(inputId + '-error');
+      if (!input || !errEl) return;
+      input.classList.toggle('error-input', show);
+      errEl.classList.toggle('visible', show);
+    }
+
+    function showServerError(msg) {
+      const el = $('server-error');
+      el.textContent = msg;
+      el.classList.add('visible');
+    }
+
+    function hideServerError() {
+      const el = $('server-error');
+      el.textContent = '';
+      el.classList.remove('visible');
+    }
+
+    // ── Form validation ───────────────────────────────────────
+    function validate(nombre, contacto, cru) {
+      let ok = true;
+
+      if (!nombre.trim()) {
+        setError('nombre', true);
+        ok = false;
+      } else {
+        setError('nombre', false);
+      }
+
+      const contactoTrimmed = contacto.trim();
+      if (!contactoTrimmed || (!isValidEmail(contactoTrimmed) && !isValidPhone(contactoTrimmed))) {
+        setError('contacto', true);
+        ok = false;
+      } else {
+        setError('contacto', false);
+      }
+
+      if (!cru.trim()) {
+        setError('cru', true);
+        ok = false;
+      } else {
+        setError('cru', false);
+      }
+
+      return ok;
+    }
+
+    // ── Submit handler ────────────────────────────────────────
+    $('signup-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const nombre   = $('nombre').value;
+      const contacto = $('contacto').value;
+      const cru      = $('cru').value;
+
+      hideServerError();
+      $('cru-duplicate-error').style.display = 'none';
+
+      if (!validate(nombre, contacto, cru)) return;
+
+      const btn = $('submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Enviando…';
+
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombre: nombre.trim(),
+            contacto: contacto.trim(),
+            cru: cru.trim().toUpperCase()
+          })
+        });
+
+        if (res.ok) {
+          // Show thank-you screen
+          $('form-section').style.display = 'none';
+          const thanksEl = $('thanks');
+          thanksEl.style.display = 'block';
+          $('thanks-name').textContent = nombre.trim().split(' ')[0];
+        } else {
+          const data = await res.json().catch(() => ({}));
+
+          if (res.status === 409) {
+            $('cru-duplicate-error').style.display = 'block';
+          } else {
+            showServerError(
+              data.error ||
+              'Ha ocurrido un error al registrar tus datos. Por favor, inténtalo de nuevo.'
+            );
+          }
+
+          btn.disabled = false;
+          btn.textContent = 'Registrar mi interés';
+        }
+      } catch {
+        showServerError('No se ha podido conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo.');
+        btn.disabled = false;
+        btn.textContent = 'Registrar mi interés';
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>
