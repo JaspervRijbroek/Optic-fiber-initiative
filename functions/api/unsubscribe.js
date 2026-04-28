@@ -1,8 +1,8 @@
 /**
  * GET /api/unsubscribe?token=<unsubscribe_token>
  *
- * Marks the matching registration as unsubscribed and returns an HTML
- * confirmation page styled with Tailwind CSS.
+ * Deletes the matching registration from the database (GDPR-compliant removal)
+ * and returns an HTML confirmation page styled with Tailwind CSS.
  *
  * Cloudflare D1 binding: DB
  */
@@ -18,7 +18,7 @@ export async function onRequestGet({ request, env }) {
   let row;
   try {
     row = await env.DB
-      .prepare('SELECT id, unsubscribed_at FROM registrations WHERE unsubscribe_token = ?')
+      .prepare('SELECT id FROM registrations WHERE unsubscribe_token = ?')
       .bind(token)
       .first();
   } catch (err) {
@@ -27,33 +27,26 @@ export async function onRequestGet({ request, env }) {
   }
 
   if (!row) {
+    // Row not found: either the token is invalid or the data was already deleted
     return page(
-      'Enlace no encontrado',
-      '<p>El enlace de baja no es válido o ya no está disponible.</p>',
-      404,
-    );
-  }
-
-  if (row.unsubscribed_at) {
-    return page(
-      'Ya dado de baja',
-      '<p>Ya habías solicitado la baja anteriormente. Tu interés ha sido eliminado de nuestra lista.</p>',
+      'Solicitud procesada',
+      '<p>Tus datos ya han sido eliminados de nuestra lista o el enlace no es válido.</p>',
     );
   }
 
   try {
     await env.DB
-      .prepare("UPDATE registrations SET unsubscribed_at = datetime('now') WHERE unsubscribe_token = ?")
+      .prepare('DELETE FROM registrations WHERE unsubscribe_token = ?')
       .bind(token)
       .run();
   } catch (err) {
-    console.error('DB unsubscribe update error:', err);
+    console.error('DB unsubscribe delete error:', err);
     return page('Error del servidor', '<p>Ha ocurrido un error al procesar tu solicitud.</p>', 500);
   }
 
   return page(
     '¡Baja confirmada!',
-    `<p>Hemos eliminado tu interés de nuestra lista. No recibirás más comunicaciones de esta iniciativa.</p>
+    `<p>Hemos eliminado todos tus datos de nuestra lista. No recibirás más comunicaciones de esta iniciativa.</p>
      <p class="mt-4"><a href="/" class="font-semibold text-[#1a237e] hover:underline">Volver al inicio</a></p>`,
   );
 }
