@@ -1,7 +1,7 @@
 # Cloudflare Pages + Workers configuration
 # https://developers.cloudflare.com/pages/
 
-name = "fibra-optica-iniciativa"
+name = "optic-fiber-initiative"
 pages_build_output_dir = "."   # static files served from the repo root
 
 # ── D1 database binding ────────────────────────────────────────────────────────
