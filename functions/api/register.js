@@ -13,10 +13,12 @@
  * Environment variables (set in Cloudflare Pages dashboard):
  *   DB                   – D1 database binding (wrangler.toml)
  *   TURNSTILE_SECRET_KEY – Cloudflare Turnstile secret key (skip check if absent)
- *   RESEND_API_KEY       – Resend email API key (skip email if absent)
+ *   SEB                  – Cloudflare send_email binding (wrangler.toml)
  *   FROM_EMAIL           – Verified sender address for outgoing emails
  *   SITE_URL             – Public site URL used to build the unsubscribe link
  */
+
+import { EmailMessage } from 'cloudflare:email';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -62,9 +64,9 @@ function generateToken() {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-/** Send a confirmation email via Resend. Skipped when RESEND_API_KEY is absent. */
+/** Send a confirmation email via Cloudflare Email Workers. Skipped when SEB binding or FROM_EMAIL is absent. */
 async function sendConfirmationEmail(env, { nombre, email, unsubscribeToken, siteUrl }) {
-  if (!env.RESEND_API_KEY) return;
+  if (!env.SEB) return;
   if (!env.FROM_EMAIL) {
     console.warn('FROM_EMAIL is not configured; skipping confirmation email.');
     return;
@@ -111,19 +113,37 @@ async function sendConfirmationEmail(env, { nombre, email, unsubscribeToken, sit
 </body>
 </html>`;
 
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
+  const subject = '¡Gracias por registrar tu interés en fibra óptica!';
+
+  // Extract the bare address from a "Display Name <addr>" string if needed.
+  const fromMatch = env.FROM_EMAIL.match(/<([^>]+)>/);
+  const fromAddress = fromMatch ? fromMatch[1] : env.FROM_EMAIL;
+
+  // Strip CR/LF from header values to prevent email header injection.
+  const safeFrom    = env.FROM_EMAIL.replace(/[\r\n]/g, '');
+  const safeTo      = email.replace(/[\r\n]/g, '');
+  const safeSubject = subject.replace(/[\r\n]/g, '');
+
+  // Build a minimal RFC 2822 / MIME message understood by Cloudflare Email Workers.
+  const rawEmail = [
+    `From: ${safeFrom}`,
+    `To: ${safeTo}`,
+    `Subject: ${safeSubject}`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/html; charset=UTF-8',
+    '',
+    html,
+  ].join('\r\n');
+
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode(rawEmail));
+      controller.close();
     },
-    body: JSON.stringify({
-      from: env.FROM_EMAIL,
-      to: [email],
-      subject: '¡Gracias por registrar tu interés en fibra óptica!',
-      html,
-    }),
   });
+
+  const message = new EmailMessage(fromAddress, email, stream);
+  await env.SEB.send(message);
 }
 
 export async function onRequestOptions() {

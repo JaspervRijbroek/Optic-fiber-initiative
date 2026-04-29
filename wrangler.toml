@@ -14,6 +14,17 @@ binding  = "DB"
 database_name = "fibra-optica-db"
 database_id = "fb24b00e-1ffa-4792-9531-4d59e6147d9b"
 
+# ── Email sending (Cloudflare Email Workers) ───────────────────────────────────
+# Allows Workers/Functions to send outbound emails via Cloudflare.
+# Requires Email Routing to be enabled for your zone in the Cloudflare dashboard.
+# See: https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/
+#
+# Remove the `destination_address` line if you want to send to arbitrary recipients
+# (e.g. each registrant's own address).  When omitted, any To: address is allowed.
+
+[[send_email]]
+name = "SEB"
+
 # ── Environment variables ──────────────────────────────────────────────────────
 # Set the following as encrypted secrets in the Cloudflare Pages dashboard:
 #   Settings → Environment variables → Production → Add variable
@@ -25,10 +36,9 @@ database_id = "fb24b00e-1ffa-4792-9531-4d59e6147d9b"
 #                          (Turnstile → <your widget> → Secret key)
 #                          Also update index.html with the matching Turnstile site key.
 #
-#   RESEND_API_KEY       – API key from https://resend.com (for confirmation emails)
-#
 #   FROM_EMAIL           – Verified sender address used in outgoing emails,
 #                          e.g. "Fibra Óptica Torrent <noreply@fibra-torrent.es>"
+#                          The domain must be configured in Cloudflare Email Routing.
 #
 #   SITE_URL             – Public URL of the site, e.g. https://fibra-torrent.es
 #                          Used to build the unsubscribe link in confirmation emails.
