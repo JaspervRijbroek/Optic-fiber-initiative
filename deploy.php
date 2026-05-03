@@ -17,12 +17,11 @@
 
 namespace Deployer;
 
-require 'vendor/autoload.php';
-
-import('recipe/symfony.php');
+require 'recipe/composer.php';
 
 // ── Project ────────────────────────────────────────────────────────────────────
 set('application', 'optic-fiber-initiative');
+set('bin/console', '{{release_path}}/bin/console');
 set('repository', 'git@github.com:JaspervRijbroek/Optic-fiber-initiative.git');
 set('git_tty', false);
 
@@ -46,6 +45,12 @@ host('production')
     ->set('branch', 'main');
 
 // ── Custom tasks ───────────────────────────────────────────────────────────────
+
+// Warm up the Symfony cache.
+desc('Warm up Symfony cache');
+task('deploy:cache:warmup', function () {
+    run('{{bin/php}} {{bin/console}} cache:warmup');
+});
 
 // Run Doctrine migrations after each deploy.
 desc('Run Doctrine migrations');
