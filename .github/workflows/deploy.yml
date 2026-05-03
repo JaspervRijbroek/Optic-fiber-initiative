@@ -17,9 +17,9 @@ jobs:
       - name: Deploy with Deployer
         uses: deployphp/action@v1
         with:
+          deployer-version: "v7.0.2"
           private-key: ${{ secrets.DEPLOY_SSH_KEY }}
-          known-hosts: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
-          dep: deploy production --no-interaction -vv
+          dep: deploy production
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
