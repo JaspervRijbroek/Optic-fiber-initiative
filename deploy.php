@@ -4,11 +4,12 @@
  * Deployer configuration for Optic Fiber Initiative (Symfony 7).
  *
  * Required GitHub Actions secrets:
- *   DEPLOY_HOST        – SSH hostname or IP of the production server
- *   DEPLOY_USER        – SSH user on the production server
- *   DEPLOY_SSH_KEY     – Private SSH key (corresponding public key must be in ~/.ssh/authorized_keys)
- *   DEPLOY_PATH        – Absolute path to the deployment directory on the server
- *                        e.g. /var/www/optic-fiber-initiative
+ *   DEPLOY_HOST         – SSH hostname or IP of the production server
+ *   DEPLOY_USER         – SSH user on the production server
+ *   DEPLOY_SSH_KEY      – Private SSH key (corresponding public key must be in ~/.ssh/authorized_keys)
+ *   DEPLOY_KNOWN_HOSTS  – Contents of ~/.ssh/known_hosts for the production server
+ *   DEPLOY_PATH         – Absolute path to the deployment directory on the server
+ *                         e.g. /var/www/optic-fiber-initiative
  *
  * Shared files/dirs that must exist on the server before the first deploy:
  *   {{deploy_path}}/shared/.env.local   – production environment variables
@@ -17,12 +18,11 @@
 
 namespace Deployer;
 
-require 'vendor/autoload.php';
-
-import('recipe/symfony.php');
+require 'recipe/composer.php';
 
 // ── Project ────────────────────────────────────────────────────────────────────
 set('application', 'optic-fiber-initiative');
+set('bin/console', '{{release_path}}/bin/console');
 set('repository', 'git@github.com:JaspervRijbroek/Optic-fiber-initiative.git');
 set('git_tty', false);
 
@@ -46,6 +46,12 @@ host('production')
     ->set('branch', 'main');
 
 // ── Custom tasks ───────────────────────────────────────────────────────────────
+
+// Warm up the Symfony cache.
+desc('Warm up Symfony cache');
+task('deploy:cache:warmup', function () {
+    run('{{bin/php}} {{bin/console}} cache:warmup');
+});
 
 // Run Doctrine migrations after each deploy.
 desc('Run Doctrine migrations');
