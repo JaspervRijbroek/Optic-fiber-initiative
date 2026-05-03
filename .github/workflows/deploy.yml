@@ -14,13 +14,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Add server to known hosts
-        run: mkdir -p ~/.ssh && ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
-
       - name: Deploy with Deployer
         uses: deployphp/action@v1
         with:
           private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+          known-hosts: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
           dep: deploy production --no-interaction -vv
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}

@@ -4,11 +4,12 @@
  * Deployer configuration for Optic Fiber Initiative (Symfony 7).
  *
  * Required GitHub Actions secrets:
- *   DEPLOY_HOST        – SSH hostname or IP of the production server
- *   DEPLOY_USER        – SSH user on the production server
- *   DEPLOY_SSH_KEY     – Private SSH key (corresponding public key must be in ~/.ssh/authorized_keys)
- *   DEPLOY_PATH        – Absolute path to the deployment directory on the server
- *                        e.g. /var/www/optic-fiber-initiative
+ *   DEPLOY_HOST         – SSH hostname or IP of the production server
+ *   DEPLOY_USER         – SSH user on the production server
+ *   DEPLOY_SSH_KEY      – Private SSH key (corresponding public key must be in ~/.ssh/authorized_keys)
+ *   DEPLOY_KNOWN_HOSTS  – Contents of ~/.ssh/known_hosts for the production server
+ *   DEPLOY_PATH         – Absolute path to the deployment directory on the server
+ *                         e.g. /var/www/optic-fiber-initiative
  *
  * Shared files/dirs that must exist on the server before the first deploy:
  *   {{deploy_path}}/shared/.env.local   – production environment variables
