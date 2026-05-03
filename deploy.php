@@ -50,13 +50,13 @@ host('production')
 // Run Doctrine migrations after each deploy.
 desc('Run Doctrine migrations');
 task('deploy:migrations', function () {
-    run('cd {{release_path}} && {{bin/php}} {{bin/console}} doctrine:migrations:migrate --no-interaction --env=prod');
+    run('cd {{release_path}} && {{bin/php}} {{bin/console}} doctrine:migrations:migrate --no-interaction');
 });
 
 // Set up Messenger transports (idempotent).
 desc('Set up Symfony Messenger transports');
 task('deploy:messenger:setup', function () {
-    run('cd {{release_path}} && {{bin/php}} {{bin/console}} messenger:setup-transports --env=prod');
+    run('cd {{release_path}} && {{bin/php}} {{bin/console}} messenger:setup-transports');
 });
 
 // ── Deploy flow ───────────────────────────────────────────────────────────────
