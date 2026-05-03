@@ -9,8 +9,8 @@
 <body class="min-h-screen flex flex-col items-center p-6 bg-gradient-to-br from-blue-50 to-green-50 font-[system-ui,sans-serif]">
 
 <nav aria-label="Menú principal" class="flex gap-2 justify-center w-full max-w-xl mx-auto mb-4">
-  <a href="index.html" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline text-[#1a237e] bg-white shadow-sm transition-colors hover:bg-[#1a237e] hover:text-white">Inicio</a>
-  <a href="info.html" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline bg-[#1a237e] text-white shadow-sm">Información</a>
+  <a href="{{ path('page_index') }}" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline text-[#1a237e] bg-white shadow-sm transition-colors hover:bg-[#1a237e] hover:text-white">Inicio</a>
+  <a href="{{ path('page_info') }}" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline bg-[#1a237e] text-white shadow-sm">Información</a>
 </nav>
 
 <div class="bg-white rounded-2xl shadow-2xl p-8 sm:p-10 w-full max-w-xl">
@@ -72,7 +72,7 @@
     </p>
   </div>
 
-  <a href="index.html" class="block mt-7 py-3 px-7 bg-[#1a237e] text-white rounded-lg text-base font-semibold text-center no-underline transition-colors hover:bg-[#283593]">
+  <a href="{{ path('page_index') }}" class="block mt-7 py-3 px-7 bg-[#1a237e] text-white rounded-lg text-base font-semibold text-center no-underline transition-colors hover:bg-[#283593]">
     Registrar mi interés ahora
   </a>
 
@@ -84,4 +84,3 @@
 
 </body>
 </html>
-

@@ -12,6 +12,7 @@ parameters:
     app.site_url: '%env(SITE_URL)%'
     app.export_secret: '%env(EXPORT_SECRET)%'
     app.turnstile_secret_key: '%env(default::TURNSTILE_SECRET_KEY)%'
+    app.turnstile_site_key: '%env(default::TURNSTILE_SITE_KEY)%'
 
 services:
     # default configuration for services in *this* file
@@ -33,6 +34,10 @@ services:
         arguments:
             $siteUrl: '%app.site_url%'
             $turnstileSecretKey: '%app.turnstile_secret_key%'
+
+    App\Controller\PageController:
+        arguments:
+            $turnstileSiteKey: '%app.turnstile_site_key%'
 
     App\Controller\ExportController:
         arguments:

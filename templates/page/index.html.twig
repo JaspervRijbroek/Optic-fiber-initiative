@@ -22,8 +22,8 @@
 <body class="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-blue-50 to-green-50 font-[system-ui,sans-serif]">
 
 <nav aria-label="Menú principal" class="flex gap-2 justify-center w-full max-w-md mx-auto mb-4">
-  <a href="index.html" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline bg-[#1a237e] text-white shadow-sm">Inicio</a>
-  <a href="info.html" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline text-[#1a237e] bg-white shadow-sm transition-colors hover:bg-[#1a237e] hover:text-white">Información</a>
+  <a href="{{ path('page_index') }}" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline bg-[#1a237e] text-white shadow-sm">Inicio</a>
+  <a href="{{ path('page_info') }}" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline text-[#1a237e] bg-white shadow-sm transition-colors hover:bg-[#1a237e] hover:text-white">Información</a>
 </nav>
 
 <div class="bg-white rounded-2xl shadow-2xl p-8 sm:p-10 w-full max-w-md">
@@ -124,12 +124,9 @@
         <span class="hidden text-xs text-red-600 mt-1 block" id="consent-error" role="alert">Debes aceptar el tratamiento de tus datos para continuar.</span>
       </div>
 
-      <!-- Cloudflare Turnstile widget                                     -->
-      <!-- Replace YOUR_SITE_KEY with the site key from the Cloudflare     -->
-      <!-- Turnstile dashboard (Turnstile → your widget → Site key).       -->
-      <!-- Leave as-is (or remove the div) to disable bot protection.      -->
+      <!-- Cloudflare Turnstile widget -->
       <div class="mb-5 flex justify-center">
-        <div class="cf-turnstile" data-sitekey="YOUR_SITE_KEY" data-theme="light"></div>
+        <div class="cf-turnstile" data-sitekey="{{ turnstileSiteKey }}" data-theme="light"></div>
       </div>
 
       <button
@@ -383,4 +380,3 @@
 
 </body>
 </html>
-
