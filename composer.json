@@ -76,5 +76,8 @@
             "allow-contrib": false,
             "require": "7.4.*"
         }
+    },
+    "require-dev": {
+        "deployer/deployer": "^8.0"
     }
 }
