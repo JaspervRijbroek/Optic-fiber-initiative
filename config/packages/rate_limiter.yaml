@@ -1,0 +1,8 @@
+framework:
+    rate_limiter:
+        ses_email:
+            policy: fixed_window
+            limit: 150
+            interval: '24 hours'
+            lock_factory: lock.factory
+            cache_pool: cache.app

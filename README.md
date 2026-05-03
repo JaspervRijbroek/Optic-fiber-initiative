@@ -1,126 +1,138 @@
 # Iniciativa Fibra Óptica
 
-A simple Spanish-language sign-up form that lets residents register their interest in getting optic-fiber broadband. All registrations are stored in a Cloudflare D1 (SQLite) database and can be exported as a password-protected CSV file to share with the installation company.
+A Spanish-language sign-up form that lets residents register their interest in getting optic-fiber broadband. The project is built with **Symfony 7** (PHP), stores data in **SQLite** via Doctrine ORM, and sends confirmation emails via **Amazon SES** using Symfony Messenger's async message queue with a rate limit of 150 emails per 24 hours.
 
 ## Features
 
 - 🇪🇸 Fully in Spanish
-- Fields: **Nombre**, **Correo / Teléfono**, **CRU** (unique identifier per connection point)
+- Fields: **Nombre**, **Correo electrónico**, **CRU** (unique identifier per connection point)
 - Duplicate CRU detection — each address can only register once
-- Thank-you confirmation screen after successful sign-up
+- Confirmation email dispatched asynchronously via Symfony Messenger → Amazon SES
+- Rate limiting: max **150 SES emails per 24 hours** (enforced in the message handler)
+- Unsubscribe link in every confirmation email (GDPR-compliant removal)
 - Password-protected CSV export endpoint (`/api/export?token=…`)
-- Zero build step — plain HTML + Vanilla JS; deploys directly to **Cloudflare Pages**
+- Optional Cloudflare Turnstile bot-protection on registration
 
 ---
 
 ## Project structure
 
 ```
-├── index.html               # Sign-up form (Spanish)
-├── functions/
-│   └── api/
-│       ├── register.js      # POST /api/register — save a registration
-│       └── export.js        # GET  /api/export   — download CSV (token-protected)
-├── schema.sql               # D1 database schema (run once)
-├── wrangler.toml            # Cloudflare Pages / D1 configuration
+├── public/
+│   ├── index.php            # Symfony front controller
+│   ├── index.html           # Registration form (static)
+│   └── info.html            # Information page (static)
+├── src/
+│   ├── Controller/
+│   │   ├── RegistrationController.php   # POST /api/register
+│   │   ├── UnsubscribeController.php    # GET  /api/unsubscribe
+│   │   └── ExportController.php         # GET  /api/export
+│   ├── Entity/
+│   │   └── Registration.php
+│   ├── Repository/
+│   │   └── RegistrationRepository.php
+│   ├── Message/
+│   │   └── SendConfirmationEmail.php
+│   └── MessageHandler/
+│       └── SendConfirmationEmailHandler.php
+├── templates/
+│   ├── email/confirmation.html.twig
+│   └── unsubscribe/page.html.twig
+├── migrations/              # Doctrine migrations
+├── config/
+│   └── packages/
+│       ├── doctrine.yaml    # SQLite config
+│       ├── messenger.yaml   # Async transport routing
+│       └── rate_limiter.yaml # 150 emails / 24 h
+├── .env                     # Default environment variables
 └── README.md
 ```
 
 ---
 
-## Deployment (Cloudflare Pages)
+## Requirements
 
-### 1. Prerequisites
+- PHP 8.2+
+- Composer
+- SQLite3 extension (usually bundled with PHP)
+- An [Amazon SES](https://aws.amazon.com/ses/) account with a verified sender
 
-- A free [Cloudflare account](https://dash.cloudflare.com/)
-- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/) installed and logged in (`wrangler login`)
+---
 
-### 2. Create the D1 database
-
-```bash
-wrangler d1 create fibra-optica-db
-```
-
-Copy the `database_id` from the output and paste it into `wrangler.toml`:
-
-```toml
-[[d1_databases]]
-binding       = "DB"
-database_name = "fibra-optica-db"
-database_id   = "PASTE-YOUR-ID-HERE"
-```
-
-### 3. Run the schema
+## Installation
 
 ```bash
-# Against the remote (production) database:
-wrangler d1 execute fibra-optica-db --remote --file=schema.sql
+# 1. Install PHP dependencies
+composer install
+
+# 2. Copy and configure environment variables
+cp .env .env.local
+# Edit .env.local with your real values (see below)
+
+# 3. Create the SQLite database and run migrations
+php bin/console doctrine:migrations:migrate --no-interaction
+
+# 4. Set up the Messenger transport tables
+php bin/console messenger:setup-transports
 ```
 
-### 4. Deploy to Cloudflare Pages
+---
 
-Connect this repository to a new **Cloudflare Pages** project in the dashboard, or deploy via CLI:
+## Environment variables
+
+Copy `.env` to `.env.local` and set the following:
+
+| Variable | Description |
+|----------|-------------|
+| `APP_SECRET` | Random 32-byte hex string — `openssl rand -hex 32` |
+| `DATABASE_URL` | SQLite path, e.g. `sqlite:///%kernel.project_dir%/var/data_prod.db` |
+| `MAILER_DSN` | Amazon SES DSN, e.g. `ses+smtp://ACCESS_KEY:SECRET_KEY@default?region=eu-west-1` |
+| `FROM_EMAIL` | Verified SES sender address, e.g. `noreply@fibra-torrent.es` |
+| `FROM_NAME` | Sender display name, e.g. `Fibra Óptica Torrent` |
+| `SITE_URL` | Public URL, e.g. `https://fibra-torrent.es` |
+| `EXPORT_SECRET` | Secret token to protect `/api/export` — `openssl rand -hex 32` |
+| `TURNSTILE_SECRET_KEY` | (Optional) Cloudflare Turnstile secret key for bot protection |
+
+---
+
+## Running the message queue consumer
+
+After registrations are saved, a `SendConfirmationEmail` message is dispatched to the `async` Doctrine transport. Start the consumer to process the queue:
 
 ```bash
-wrangler pages deploy . --project-name fibra-optica-iniciativa
+php bin/console messenger:consume async --time-limit=3600
 ```
 
-### 5. Set the export secret
-
-In the Cloudflare Pages dashboard:
-
-> **Settings → Environment variables → Production → Add variable**
-
-| Name | Value |
-|------|-------|
-| `EXPORT_SECRET` | A long random string (e.g. `openssl rand -hex 32`) |
-
-> ⚠️ Keep this secret private. Anyone with it can download all registrations.
+In production, manage this with **Supervisor** or **systemd** so it restarts automatically.
 
 ---
 
 ## Exporting registrations
 
-Send a GET request to:
-
 ```
-https://<your-domain>/api/export?token=<EXPORT_SECRET>
+GET /api/export?token=<EXPORT_SECRET>
 ```
 
-The response is a UTF-8 CSV file (with BOM for Excel compatibility) with columns:
+Returns a UTF-8 CSV (BOM-prefixed for Excel compatibility):
 
-| ID | Nombre | Contacto | CRU | Fecha de Registro |
-|----|--------|----------|-----|-------------------|
-
-You can open it directly in Microsoft Excel or Google Sheets.
+| ID | Nombre | Email | CRU | Fecha de Registro |
 
 ---
 
 ## Local development
 
 ```bash
-# Install Wrangler (if not already installed)
-npm install -g wrangler
+# Start a local web server
+php -S localhost:8000 -t public
 
-# Initialise a local D1 database and run the schema
-wrangler d1 execute fibra-optica-db --local --file=schema.sql
-
-# Start the local dev server (includes Pages Functions)
-wrangler pages dev . --d1 DB=fibra-optica-db
+# In another terminal, process queued messages
+php bin/console messenger:consume async -vv
 ```
 
-The site is then available at `http://localhost:8788`.
-
-To test the export locally, set a temporary secret:
-
-```bash
-EXPORT_SECRET=test123 wrangler pages dev . --d1 DB=fibra-optica-db
-# then visit: http://localhost:8788/api/export?token=test123
-```
+Visit `http://localhost:8000` for the sign-up form.
 
 ---
 
 ## What is a CRU?
 
 The **CRU** (Código de Referencia Único de Punto de Suministro) is a unique reference code printed on every Spanish electricity or gas bill. It uniquely identifies the supply point (i.e. the address), making it the ideal key to measure per-address interest without collecting sensitive personal data such as a full postal address.
-
