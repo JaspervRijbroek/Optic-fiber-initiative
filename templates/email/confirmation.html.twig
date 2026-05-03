@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body style="font-family:system-ui,sans-serif;background:#f0f4ff;margin:0;padding:24px">
+  <div style="background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.1);padding:40px;max-width:480px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:24px">
+      <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="28" cy="28" r="28" fill="#e8eaf6"/>
+        <path d="M14 28 Q21 14 28 28 Q35 42 42 28" stroke="#1a237e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M14 22 Q21 8 28 22 Q35 36 42 22" stroke="#3949ab" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>
+        <path d="M14 34 Q21 20 28 34 Q35 48 42 34" stroke="#3949ab" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>
+        <circle cx="14" cy="28" r="3" fill="#1a237e"/>
+        <circle cx="42" cy="28" r="3" fill="#1a237e"/>
+      </svg>
+    </div>
+    <h1 style="color:#1a237e;text-align:center;font-size:22px;margin:0 0 8px">¡Gracias por registrarte, {{ firstName }}!</h1>
+    <p style="color:#546e7a;text-align:center;font-size:15px;line-height:1.6;margin:0 0 24px">
+      Hemos recibido tu interés en recibir fibra óptica en tu zona.<br>
+      Cuantas más personas se registren, más rápido podremos avanzar con la instalación.
+    </p>
+    <div style="background:#e8eaf6;border-radius:12px;padding:16px 20px;margin-bottom:24px">
+      <p style="color:#1a237e;font-size:14px;margin:0">
+        📋 <strong>¿Qué pasa ahora?</strong> Recopilaremos todos los registros y los
+        enviaremos formalmente a Telefónica para demostrar la demanda en tu zona.
+        Te contactaremos cuando haya novedades.
+      </p>
+    </div>
+    <p style="color:#546e7a;font-size:13px;text-align:center;margin:0">
+      ¿Conoces a alguien más que quiera fibra óptica? ¡Comparte esta iniciativa!
+    </p>
+  </div>
+  <p style="text-align:center;margin-top:24px;font-size:11px;color:#90a4ae">
+    Si no deseas recibir más comunicaciones de esta iniciativa, puedes
+    <a href="{{ unsubscribeUrl }}" style="color:#546e7a">darte de baja aquí</a>.
+  </p>
+</body>
+</html>
