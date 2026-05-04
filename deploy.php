@@ -33,6 +33,7 @@ set('ssh_multiplexing', true);
 // ── Shared files & directories ─────────────────────────────────────────────────
 // These live in {{deploy_path}}/shared and are symlinked into every release.
 add('shared_files', ['.env.local', 'var/data.db']);
+add('shared_dirs', ['var/log']);
 
 // ── Writable directories ───────────────────────────────────────────────────────
 add('writable_dirs', ['var']);
