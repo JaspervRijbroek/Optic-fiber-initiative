@@ -86,7 +86,7 @@ final class RegistrationController extends AbstractController
     private function verifyTurnstile(string $token, ?string $ip): bool
     {
         try {
-            $response = $this->httpClient->request('POST', 'https://challenges.cloudflare.com/turnstile/v1/siteverify', [
+            $response = $this->httpClient->request('POST', 'https://challenges.cloudflare.com/turnstile/v0/siteverify', [
                 'body' => array_filter([
                     'secret' => $this->turnstileSecretKey,
                     'response' => $token,
