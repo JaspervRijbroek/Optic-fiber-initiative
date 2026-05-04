@@ -47,6 +47,14 @@ host('production')
 
 // ── Custom tasks ───────────────────────────────────────────────────────────────
 
+// Reload supervisor so the messenger worker picks up the new release.
+desc('Reload supervisor and restart messenger consumers');
+task('deploy:supervisor:reload', function () {
+    run('sudo supervisorctl reread');
+    run('sudo supervisorctl update');
+    run('sudo supervisorctl restart messenger-consume');
+});
+
 // Warm up the Symfony cache.
 desc('Warm up Symfony cache');
 task('deploy:cache:warmup', function () {
@@ -74,6 +82,7 @@ task('deploy', [
     'deploy:migrations',
     'deploy:messenger:setup',
     'deploy:publish',
+    'deploy:supervisor:reload',
 ]);
 
 // Roll back on failure.
