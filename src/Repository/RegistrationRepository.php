@@ -28,6 +28,14 @@ class RegistrationRepository extends ServiceEntityRepository
         return $this->findOneBy(['unsubscribeToken' => $token]);
     }
 
+    public function countAll(): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     /**
      * @return Registration[]
      */

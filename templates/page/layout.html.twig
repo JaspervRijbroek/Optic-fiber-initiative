@@ -27,6 +27,13 @@
   <a href="{{ path('page_info') }}" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline transition-colors hover:bg-[#1a237e] hover:text-white {{ currentRoute == 'page_info' ? 'bg-[#1a237e] text-white shadow-sm' : 'text-[#1a237e] bg-white shadow-sm' }}">Información</a>
 </nav>
 
+<p class="text-center text-sm mb-3">
+  <span class="inline-flex items-center gap-1.5 bg-white rounded-full px-3 py-1 shadow-sm border border-slate-100 font-medium text-[#1a237e]">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    {{ registration_count() }} vecinos registrados
+  </span>
+</p>
+
 <div class="bg-white rounded-2xl shadow-2xl p-8 sm:p-10 w-full {% block card_max_width %}max-w-md{% endblock %}">
   {% block content %}{% endblock %}
 </div>
