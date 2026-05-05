@@ -58,24 +58,31 @@
       </div>
 
       <div class="mb-5">
-        <label for="cru" class="block text-xs font-semibold text-slate-600 mb-1">
-          CRU (Código de Referencia Único) <span aria-hidden="true">*</span>
+        <label for="cadastral-reference" class="block text-xs font-semibold text-slate-600 mb-1">
+          Referencia Catastral <span aria-hidden="true">*</span>
         </label>
         <input
           type="text"
-          id="cru"
-          name="cru"
-          placeholder="Ej. ES0031415927182A1FA"
+          id="cadastral-reference"
+          name="cadastral_reference"
+          placeholder="Ej. 9872023VH5797S0001WX"
+          maxlength="20"
+          minlength="20"
           autocomplete="off"
           required
           class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base text-slate-800 outline-none transition-colors focus:border-[#1a237e] focus:ring-2 focus:ring-[#1a237e]/10"
         />
-        <p class="text-xs text-slate-400 mt-1">Encuéntralo en tu factura de electricidad o gas. Es el identificador único de tu punto de suministro.</p>
-        <span class="hidden text-xs text-red-600 mt-1 block" id="cru-error">Por favor, introduce tu código CRU.</span>
+        <div class="mt-2 bg-[#e8eaf6] rounded-lg px-3 py-2.5 text-xs text-[#1a237e] leading-relaxed">
+          ℹ️ <strong>¿Dónde encontrarla?</strong> En el recibo del IBI (Impuesto sobre Bienes Inmuebles),
+          en la escritura de tu propiedad, o consultándola en la
+          <a href="https://www1.sedecatastro.gob.es/OVCFrames.aspx?TIPO=CONSULTA" target="_blank" rel="noopener noreferrer" class="underline hover:text-[#283593]">Sede Electrónica del Catastro</a>.
+          Son siempre <strong>20 caracteres alfanuméricos</strong> (letras y números en mayúsculas).
+        </div>
+        <span class="hidden text-xs text-red-600 mt-1 block" id="cadastral-reference-error">La Referencia Catastral debe tener exactamente 20 caracteres alfanuméricos.</span>
       </div>
 
-      <div id="cru-duplicate-error" class="hidden bg-red-50 border border-red-300 rounded-lg px-4 py-3 text-red-700 text-sm mb-4" role="alert">
-        Este CRU ya ha sido registrado. Si crees que es un error, contacta con nosotros.
+      <div id="cadastral-reference-duplicate-error" class="hidden bg-red-50 border border-red-300 rounded-lg px-4 py-3 text-red-700 text-sm mb-4" role="alert">
+        Esta Referencia Catastral ya ha sido registrada. Si crees que es un error, contacta con nosotros.
       </div>
 
       <div class="mb-5">
@@ -90,7 +97,7 @@
             class="mt-0.5 h-4 w-4 flex-shrink-0 accent-[#1a237e] cursor-pointer"
           />
           <span class="text-xs text-slate-600 leading-relaxed">
-            Acepto que mis datos (nombre, correo electrónico y CRU) sean compartidos con
+            Acepto que mis datos (nombre, correo electrónico y Referencia Catastral) sean compartidos con
             <strong>Movistar</strong> para gestionar la solicitud de instalación de fibra óptica en mi zona.
             <span class="sr-only">(obligatorio)</span>
           </span>
@@ -261,7 +268,11 @@
       el.classList.add('hidden');
     }
 
-    function validate(nombre, email, cru, consent) {
+    function isValidCadastralRef(val) {
+      return /^[A-Z0-9]{20}$/.test(val.trim().toUpperCase());
+    }
+
+    function validate(nombre, email, cadastralRef, consent) {
       let ok = true;
 
       if (!nombre.trim()) {
@@ -278,11 +289,11 @@
         setError('email', false);
       }
 
-      if (!cru.trim()) {
-        setError('cru', true);
+      if (!cadastralRef.trim() || !isValidCadastralRef(cadastralRef)) {
+        setError('cadastral-reference', true);
         ok = false;
       } else {
-        setError('cru', false);
+        setError('cadastral-reference', false);
       }
 
       if (!consent) {
@@ -300,14 +311,14 @@
 
       const nombre         = $('nombre').value;
       const email          = $('email').value;
-      const cru            = $('cru').value;
+      const cadastralRef   = $('cadastral-reference').value;
       const consent        = $('consent').checked;
       const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value || '';
 
       hideServerError();
-      $('cru-duplicate-error').classList.add('hidden');
+      $('cadastral-reference-duplicate-error').classList.add('hidden');
 
-      if (!validate(nombre, email, cru, consent)) return;
+      if (!validate(nombre, email, cadastralRef, consent)) return;
 
       const btn = $('submit-btn');
       btn.disabled = true;
@@ -320,7 +331,7 @@
           body: JSON.stringify({
             nombre: nombre.trim(),
             email: email.trim(),
-            cru: cru.trim().toUpperCase(),
+            cadastral_reference: cadastralRef.trim().toUpperCase(),
             turnstileToken,
           })
         });
@@ -333,7 +344,7 @@
           const data = await res.json().catch(() => ({}));
 
           if (res.status === 409) {
-            $('cru-duplicate-error').classList.remove('hidden');
+            $('cadastral-reference-duplicate-error').classList.remove('hidden');
           } else {
             showServerError(
               data.error ||
@@ -349,6 +360,13 @@
         btn.disabled = false;
         btn.textContent = 'Registrar mi interés';
       }
+    });
+
+    // Auto-uppercase the cadastral reference as the user types
+    $('cadastral-reference').addEventListener('input', function () {
+      const pos = this.selectionStart;
+      this.value = this.value.toUpperCase();
+      this.setSelectionRange(pos, pos);
     });
   })();
 </script>

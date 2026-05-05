@@ -42,7 +42,7 @@ final class RegistrationController extends AbstractController
 
         $nombre = trim((string) ($data['nombre'] ?? ''));
         $email = trim((string) ($data['email'] ?? ''));
-        $cru = strtoupper(trim((string) ($data['cru'] ?? '')));
+        $cadastralReference = strtoupper(trim((string) ($data['cadastral_reference'] ?? '')));
         $turnstileToken = trim((string) ($data['turnstileToken'] ?? ''));
 
         // Verify Turnstile (skipped when secret key is not configured)
@@ -60,18 +60,21 @@ final class RegistrationController extends AbstractController
         if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return $this->json(['error' => 'Introduce un correo electrónico válido.'], Response::HTTP_BAD_REQUEST);
         }
-        if (!$cru) {
-            return $this->json(['error' => 'El campo "CRU" es obligatorio.'], Response::HTTP_BAD_REQUEST);
+        if (!$cadastralReference) {
+            return $this->json(['error' => 'El campo "Referencia Catastral" es obligatorio.'], Response::HTTP_BAD_REQUEST);
+        }
+        if (!preg_match('/^[A-Z0-9]{20}$/', $cadastralReference)) {
+            return $this->json(['error' => 'La Referencia Catastral debe tener exactamente 20 caracteres alfanuméricos (letras y números).'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Duplicate CRU check
-        if ($this->registrationRepository->findByCru($cru) !== null) {
-            return $this->json(['error' => 'Este CRU ya está registrado.'], Response::HTTP_CONFLICT);
+        // Duplicate cadastral reference check
+        if ($this->registrationRepository->findByCadastralReference($cadastralReference) !== null) {
+            return $this->json(['error' => 'Esta Referencia Catastral ya está registrada.'], Response::HTTP_CONFLICT);
         }
 
         // Persist new registration
         $unsubscribeToken = bin2hex(random_bytes(24));
-        $registration = new Registration($nombre, $email, $cru, $unsubscribeToken);
+        $registration = new Registration($nombre, $email, $cadastralReference, $unsubscribeToken);
 
         $this->em->persist($registration);
         $this->em->flush();

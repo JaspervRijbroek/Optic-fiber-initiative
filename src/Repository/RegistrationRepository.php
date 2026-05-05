@@ -18,9 +18,9 @@ class RegistrationRepository extends ServiceEntityRepository
         parent::__construct($registry, Registration::class);
     }
 
-    public function findByCru(string $cru): ?Registration
+    public function findByCadastralReference(string $cadastralReference): ?Registration
     {
-        return $this->findOneBy(['cru' => $cru]);
+        return $this->findOneBy(['cadastralReference' => $cadastralReference]);
     }
 
     public function findByUnsubscribeToken(string $token): ?Registration
