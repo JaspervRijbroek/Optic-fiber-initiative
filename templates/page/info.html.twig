@@ -1,30 +1,14 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Información — Iniciativa Fibra Óptica</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="min-h-screen flex flex-col items-center p-6 bg-gradient-to-br from-blue-50 to-green-50 font-[system-ui,sans-serif]">
+{% extends 'page/layout.html.twig' %}
 
-<nav aria-label="Menú principal" class="flex gap-2 justify-center w-full max-w-xl mx-auto mb-4">
-  <a href="{{ path('page_index') }}" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline text-[#1a237e] bg-white shadow-sm transition-colors hover:bg-[#1a237e] hover:text-white">Inicio</a>
-  <a href="{{ path('page_info') }}" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline bg-[#1a237e] text-white shadow-sm">Información</a>
-</nav>
+{% block title %}Información{% endblock %}
 
-<div class="bg-white rounded-2xl shadow-2xl p-8 sm:p-10 w-full max-w-xl">
+{% block nav_max_width %}max-w-xl{% endblock %}
 
-  <div class="flex justify-center mb-6" aria-hidden="true">
-    <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="28" cy="28" r="28" fill="#e8eaf6"/>
-      <path d="M14 28 Q21 14 28 28 Q35 42 42 28" stroke="#1a237e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <path d="M14 22 Q21 8 28 22 Q35 36 42 22" stroke="#3949ab" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>
-      <path d="M14 34 Q21 20 28 34 Q35 48 42 34" stroke="#3949ab" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>
-      <circle cx="14" cy="28" r="3" fill="#1a237e"/>
-      <circle cx="42" cy="28" r="3" fill="#1a237e"/>
-    </svg>
-  </div>
+{% block card_max_width %}max-w-xl{% endblock %}
+
+{% block content %}
+
+  {% include 'page/_logo.html.twig' %}
 
   <h1 class="text-2xl font-bold text-[#1a237e] text-center mb-6">¿Cómo funciona esta iniciativa?</h1>
 
@@ -80,7 +64,4 @@
     Iniciativa vecinal por la fibra óptica en las zonas dispersas de Torrent.
   </p>
 
-</div>
-
-</body>
-</html>
+{% endblock %}

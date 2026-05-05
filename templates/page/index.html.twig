@@ -1,45 +1,19 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Iniciativa Fibra Óptica — Regístrate</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: { DEFAULT: '#1a237e', dark: '#283593' }
-          }
-        }
-      }
-    }
-  </script>
+{% extends 'page/layout.html.twig' %}
+
+{% block title %}Regístrate{% endblock %}
+
+{% block head %}
   <!-- Cloudflare Turnstile -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-</head>
-<body class="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-blue-50 to-green-50 font-[system-ui,sans-serif]">
+{% endblock %}
 
-<nav aria-label="Menú principal" class="flex gap-2 justify-center w-full max-w-md mx-auto mb-4">
-  <a href="{{ path('page_index') }}" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline bg-[#1a237e] text-white shadow-sm">Inicio</a>
-  <a href="{{ path('page_info') }}" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline text-[#1a237e] bg-white shadow-sm transition-colors hover:bg-[#1a237e] hover:text-white">Información</a>
-</nav>
+{% block body_extra_classes %}justify-center{% endblock %}
 
-<div class="bg-white rounded-2xl shadow-2xl p-8 sm:p-10 w-full max-w-md">
+{% block content %}
 
   <!-- Signup form -->
   <div id="form-section">
-    <div class="flex justify-center mb-6" aria-hidden="true">
-      <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="28" cy="28" r="28" fill="#e8eaf6"/>
-        <path d="M14 28 Q21 14 28 28 Q35 42 42 28" stroke="#1a237e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-        <path d="M14 22 Q21 8 28 22 Q35 36 42 22" stroke="#3949ab" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>
-        <path d="M14 34 Q21 20 28 34 Q35 48 42 34" stroke="#3949ab" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>
-        <circle cx="14" cy="28" r="3" fill="#1a237e"/>
-        <circle cx="42" cy="28" r="3" fill="#1a237e"/>
-      </svg>
-    </div>
+    {% include 'page/_logo.html.twig' %}
 
     <h1 class="text-2xl font-bold text-[#1a237e] text-center mb-1">Fibra Óptica en tu Zona</h1>
     <p class="text-center text-slate-500 text-sm mb-8 leading-relaxed">
@@ -220,8 +194,9 @@
     </div>
   </div>
 
-</div>
+{% endblock %}
 
+{% block scripts %}
 <script>
   (function () {
     'use strict';
@@ -377,6 +352,4 @@
     });
   })();
 </script>
-
-</body>
-</html>
+{% endblock %}

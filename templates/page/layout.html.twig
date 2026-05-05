@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Iniciativa Fibra Óptica{% endblock %} — Fibra Óptica Torrent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: { DEFAULT: '#1a237e', dark: '#283593' }
+          }
+        }
+      }
+    }
+  </script>
+  {% block head %}{% endblock %}
+</head>
+<body class="min-h-screen flex flex-col items-center {% block body_extra_classes %}{% endblock %} p-6 bg-gradient-to-br from-blue-50 to-green-50 font-[system-ui,sans-serif]">
+
+{% set currentRoute = app.request.attributes.get('_route') %}
+
+<nav aria-label="Menú principal" class="flex gap-2 justify-center w-full {% block nav_max_width %}max-w-md{% endblock %} mx-auto mb-4">
+  <a href="{{ path('page_index') }}" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline transition-colors hover:bg-[#1a237e] hover:text-white {{ currentRoute == 'page_index' ? 'bg-[#1a237e] text-white shadow-sm' : 'text-[#1a237e] bg-white shadow-sm' }}">Inicio</a>
+  <a href="{{ path('page_info') }}" class="px-4 py-1.5 rounded-full text-sm font-semibold no-underline transition-colors hover:bg-[#1a237e] hover:text-white {{ currentRoute == 'page_info' ? 'bg-[#1a237e] text-white shadow-sm' : 'text-[#1a237e] bg-white shadow-sm' }}">Información</a>
+</nav>
+
+<div class="bg-white rounded-2xl shadow-2xl p-8 sm:p-10 w-full {% block card_max_width %}max-w-md{% endblock %}">
+  {% block content %}{% endblock %}
+</div>
+
+{% block scripts %}{% endblock %}
+
+</body>
+</html>
