@@ -24,8 +24,14 @@ class Registration
     #[ORM\Column(type: 'string', length: 255)]
     private string $email;
 
-    #[ORM\Column(name: 'cadastral_reference', type: 'string', length: 255, unique: true)]
-    private string $cadastralReference;
+    #[ORM\Column(name: 'cadastral_reference', type: 'string', length: 255, unique: true, nullable: true)]
+    private ?string $cadastralReference;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $latitude;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $longitude;
 
     #[ORM\Column(name: 'unsubscribe_token', type: 'string', length: 255, unique: true)]
     private string $unsubscribeToken;
@@ -33,11 +39,20 @@ class Registration
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
-    public function __construct(string $nombre, string $email, string $cadastralReference, string $unsubscribeToken)
+    public function __construct(
+        string $nombre,
+        string $email,
+        ?string $cadastralReference,
+        ?float $latitude,
+        ?float $longitude,
+        string $unsubscribeToken
+    )
     {
         $this->nombre = $nombre;
         $this->email = $email;
         $this->cadastralReference = $cadastralReference;
+        $this->latitude = $latitude;
+        $this->longitude = $longitude;
         $this->unsubscribeToken = $unsubscribeToken;
         $this->createdAt = new \DateTimeImmutable();
     }
@@ -57,9 +72,19 @@ class Registration
         return $this->email;
     }
 
-    public function getCadastralReference(): string
+    public function getCadastralReference(): ?string
     {
         return $this->cadastralReference;
+    }
+
+    public function getLatitude(): ?float
+    {
+        return $this->latitude;
+    }
+
+    public function getLongitude(): ?float
+    {
+        return $this->longitude;
     }
 
     public function getUnsubscribeToken(): string

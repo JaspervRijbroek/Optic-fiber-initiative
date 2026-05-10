@@ -5,8 +5,8 @@ A Spanish-language sign-up form that lets residents register their interest in g
 ## Features
 
 - 🇪🇸 Fully in Spanish
-- Fields: **Nombre**, **Correo electrónico**, **CRU** (unique identifier per connection point)
-- Duplicate CRU detection — each address can only register once
+- Fields: **Nombre**, **Correo electrónico**, and either **Referencia Catastral** or **GPS coordinates**
+- Duplicate cadastral-reference detection — each cadastral reference can only register once
 - Confirmation email dispatched asynchronously via Symfony Messenger → Amazon SES
 - Rate limiting: max **150 SES emails per 24 hours** (enforced in the message handler)
 - Unsubscribe link in every confirmation email (GDPR-compliant removal)
@@ -115,7 +115,7 @@ GET /api/export?token=<EXPORT_SECRET>
 
 Returns a UTF-8 CSV (BOM-prefixed for Excel compatibility):
 
-| ID | Nombre | Email | CRU | Fecha de Registro |
+| ID | Nombre | Email | Referencia Catastral | Latitud | Longitud | Fecha de Registro |
 
 ---
 
