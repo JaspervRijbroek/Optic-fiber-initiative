@@ -49,7 +49,8 @@ final class RegistrationController extends AbstractController
 
         $latitude = $this->normalizeCoordinate($latitudeRaw);
         $longitude = $this->normalizeCoordinate($longitudeRaw);
-        $hasCoordinates = $latitude !== null || $longitude !== null;
+        $hasAnyCoordinates = $latitude !== null || $longitude !== null;
+        $hasCompleteCoordinates = $latitude !== null && $longitude !== null;
 
         // Verify Turnstile (skipped when secret key is not configured)
         if ($this->turnstileSecretKey && !$this->verifyTurnstile($turnstileToken, $request->getClientIp())) {
@@ -66,13 +67,13 @@ final class RegistrationController extends AbstractController
         if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return $this->json(['error' => 'Introduce un correo electrónico válido.'], Response::HTTP_BAD_REQUEST);
         }
-        if (!$cadastralReference && !$hasCoordinates) {
+        if (!$cadastralReference && !$hasAnyCoordinates) {
             return $this->json(['error' => 'Debes introducir una Referencia Catastral o compartir tu ubicación GPS.'], Response::HTTP_BAD_REQUEST);
         }
         if ($cadastralReference && !preg_match('/^[A-Z0-9]{20}$/', $cadastralReference)) {
             return $this->json(['error' => 'La Referencia Catastral debe tener exactamente 20 caracteres alfanuméricos (letras y números).'], Response::HTTP_BAD_REQUEST);
         }
-        if ($hasCoordinates && ($latitude === null || $longitude === null)) {
+        if ($hasAnyCoordinates && !$hasCompleteCoordinates) {
             return $this->json(['error' => 'Debes proporcionar latitud y longitud válidas para la ubicación GPS.'], Response::HTTP_BAD_REQUEST);
         }
         if ($latitude !== null && ($latitude < -90 || $latitude > 90)) {

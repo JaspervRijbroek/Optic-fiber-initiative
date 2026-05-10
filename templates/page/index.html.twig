@@ -313,7 +313,8 @@
     function validate(nombre, email, cadastralRef, latitude, longitude, consent) {
       let ok = true;
       const hasCadastral = cadastralRef.trim().length > 0;
-      const hasCoordinates = latitude !== '' || longitude !== '';
+      const hasAnyCoordinates = latitude !== '' || longitude !== '';
+      const hasCoordinates = latitude !== '' && longitude !== '';
 
       if (!nombre.trim()) {
         setError('nombre', true);
@@ -336,9 +337,12 @@
         setError('cadastral-reference', false);
       }
 
-      if (!hasCadastral && !hasCoordinates) {
+      if (!hasCadastral && !hasAnyCoordinates) {
         setError('cadastral-reference', true);
         setGpsStatus('error', 'Debes introducir una Referencia Catastral o compartir tu ubicación GPS.');
+        ok = false;
+      } else if (hasAnyCoordinates && !hasCoordinates) {
+        setGpsStatus('error', 'Debes permitir capturar latitud y longitud para usar tu ubicación GPS.');
         ok = false;
       } else if (hasCoordinates && !isValidCoordinates(latitude, longitude)) {
         setGpsStatus('error', 'Las coordenadas GPS recibidas no son válidas. Inténtalo de nuevo.');
