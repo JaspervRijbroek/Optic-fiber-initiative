@@ -211,26 +211,24 @@ final class RegistrationController extends AbstractController
 
     private function getSessionLatitude(Request $request, string $cadastralReference): ?float
     {
-        $sessionReference = strtoupper(trim((string) $request->getSession()->get('gps_cadastral_reference', '')));
-        $latitude = $request->getSession()->get('gps_latitude');
-
-        if ($sessionReference !== $cadastralReference || !is_numeric($latitude)) {
-            return null;
-        }
-
-        return (float) $latitude;
+        return $this->getSessionCoordinate($request, $cadastralReference, 'gps_latitude');
     }
 
     private function getSessionLongitude(Request $request, string $cadastralReference): ?float
     {
-        $sessionReference = strtoupper(trim((string) $request->getSession()->get('gps_cadastral_reference', '')));
-        $longitude = $request->getSession()->get('gps_longitude');
+        return $this->getSessionCoordinate($request, $cadastralReference, 'gps_longitude');
+    }
 
-        if ($sessionReference !== $cadastralReference || !is_numeric($longitude)) {
+    private function getSessionCoordinate(Request $request, string $cadastralReference, string $coordinateKey): ?float
+    {
+        $sessionReference = strtoupper(trim((string) $request->getSession()->get('gps_cadastral_reference', '')));
+        $coordinate = $request->getSession()->get($coordinateKey);
+
+        if ($sessionReference !== $cadastralReference || !is_numeric($coordinate)) {
             return null;
         }
 
-        return (float) $longitude;
+        return (float) $coordinate;
     }
 
     private function clearGpsSession(Request $request): void
