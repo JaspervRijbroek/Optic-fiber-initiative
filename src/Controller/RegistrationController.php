@@ -8,6 +8,7 @@ use App\Entity\Registration;
 use App\Message\SendConfirmationEmail;
 use App\Repository\RegistrationRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,6 +25,7 @@ final class RegistrationController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly RegistrationRepository $registrationRepository,
         private readonly MessageBusInterface $bus,
+        private readonly LoggerInterface $logger,
         private readonly string $siteUrl,
         private readonly ?string $turnstileSecretKey,
     ) {}
@@ -145,7 +147,13 @@ final class RegistrationController extends AbstractController
             $request->getSession()->set('gps_cadastral_reference', $cadastralReference);
 
             return $this->json(['cadastral_reference' => $cadastralReference], Response::HTTP_OK);
-        } catch (\Throwable) {
+        } catch (\Throwable $exception) {
+            $this->logger->warning('Catastro cadastral-reference lookup failed.', [
+                'exception' => $exception,
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+            ]);
+
             return $this->json(['error' => 'No se pudo obtener la Referencia Catastral automáticamente.'], Response::HTTP_BAD_GATEWAY);
         }
     }
