@@ -61,17 +61,31 @@
         <label for="cadastral-reference" class="block text-xs font-semibold text-slate-600 mb-1">
           Referencia Catastral <span aria-hidden="true">*</span>
         </label>
-        <input
-          type="text"
-          id="cadastral-reference"
-          name="cadastral_reference"
-          placeholder="Ej. 9872023VH5797S0001WX"
-          maxlength="20"
-          minlength="20"
-          autocomplete="off"
-          required
-          class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base text-slate-800 outline-none transition-colors focus:border-[#1a237e] focus:ring-2 focus:ring-[#1a237e]/10"
-        />
+        <div class="flex items-stretch gap-2">
+          <input
+            type="text"
+            id="cadastral-reference"
+            name="cadastral_reference"
+            placeholder="Ej. 9872023VH5797S0001WX"
+            maxlength="20"
+            minlength="20"
+            autocomplete="off"
+            required
+            class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base text-slate-800 outline-none transition-colors focus:border-[#1a237e] focus:ring-2 focus:ring-[#1a237e]/10"
+          />
+          <button
+            type="button"
+            id="cadastral-reference-gps-btn"
+            class="inline-flex items-center justify-center px-3 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#1a237e]/20 disabled:opacity-60 disabled:cursor-not-allowed"
+            aria-label="Obtener referencia catastral mediante GPS"
+            title="Obtener Referencia Catastral con GPS"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M11 2.05v2.02A8.002 8.002 0 0 0 4.07 11H2.05v2h2.02A8.002 8.002 0 0 0 11 19.93v2.02h2v-2.02A8.002 8.002 0 0 0 19.93 13h2.02v-2h-2.02A8.002 8.002 0 0 0 13 4.07V2.05h-2Zm1 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12Zm0 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+            </svg>
+          </button>
+        </div>
+        <span class="hidden text-xs text-red-600 mt-1 block" id="cadastral-reference-gps-error"></span>
         <div class="mt-2 bg-[#e8eaf6] rounded-lg px-3 py-2.5 text-xs text-[#1a237e] leading-relaxed">
           ℹ️ <strong>¿Dónde encontrarla?</strong> En el recibo del IBI (Impuesto sobre Bienes Inmuebles),
           en la escritura de tu propiedad, o consultándola en la
@@ -97,7 +111,7 @@
             class="mt-0.5 h-4 w-4 flex-shrink-0 accent-[#1a237e] cursor-pointer"
           />
           <span class="text-xs text-slate-600 leading-relaxed">
-            Acepto que mis datos (nombre, correo electrónico y Referencia Catastral) sean compartidos con
+            Acepto que mis datos (nombre, correo electrónico, Referencia Catastral y coordenadas GPS si se usan) sean compartidos con
             <strong>Movistar</strong> para gestionar la solicitud de instalación de fibra óptica en mi zona.
             <span class="sr-only">(obligatorio)</span>
           </span>
@@ -270,6 +284,19 @@
       el.classList.add('hidden');
     }
 
+    function setGpsError(message) {
+      const el = $('cadastral-reference-gps-error');
+      if (!el) return;
+      if (!message) {
+        el.textContent = '';
+        el.classList.add('hidden');
+        return;
+      }
+
+      el.textContent = message;
+      el.classList.remove('hidden');
+    }
+
     function isValidCadastralRef(val) {
       return /^[A-Z0-9]{20}$/.test(val.trim().toUpperCase());
     }
@@ -369,6 +396,69 @@
       const pos = this.selectionStart;
       this.value = this.value.toUpperCase();
       this.setSelectionRange(pos, pos);
+    });
+
+    $('cadastral-reference-gps-btn').addEventListener('click', async function () {
+      hideServerError();
+      setGpsError('');
+
+      const isHome = window.confirm('¿Estás en casa en este momento?');
+      if (!isHome) return;
+
+      if (!navigator.geolocation) {
+        setGpsError('Tu navegador no permite geolocalización.');
+        return;
+      }
+
+      const gpsBtn = this;
+      gpsBtn.disabled = true;
+
+      try {
+        const position = await new Promise(function (resolve, reject) {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0,
+          });
+        });
+
+        const res = await fetch('/api/cadastral-reference-from-coordinates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.cadastral_reference) {
+          setGpsError(
+            data.error ||
+            'No hemos podido obtener la Referencia Catastral con tu ubicación.'
+          );
+          return;
+        }
+
+        $('cadastral-reference').value = data.cadastral_reference.toUpperCase();
+        setError('cadastral-reference', false);
+      } catch (error) {
+        if (error && typeof error === 'object' && 'code' in error) {
+          if (error.code === 1) {
+            setGpsError('Has denegado el permiso de ubicación.');
+          } else if (error.code === 2) {
+            setGpsError('No se ha podido obtener tu ubicación.');
+          } else if (error.code === 3) {
+            setGpsError('Se agotó el tiempo al intentar obtener tu ubicación.');
+          } else {
+            setGpsError('No hemos podido obtener tu ubicación GPS.');
+          }
+        } else {
+          setGpsError('No hemos podido obtener tu ubicación GPS.');
+        }
+      } finally {
+        gpsBtn.disabled = false;
+      }
     });
   })();
 </script>
