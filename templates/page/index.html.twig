@@ -58,6 +58,35 @@
       </div>
 
       <div class="mb-5">
+        <p class="block text-xs font-semibold text-slate-600 mb-2">
+          Método de localización <span aria-hidden="true">*</span>
+        </p>
+        <div class="flex flex-col gap-2 text-sm text-slate-700">
+          <label class="inline-flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              id="input-mode-cadastral"
+              name="input_mode"
+              value="cadastral_reference"
+              checked
+              class="h-4 w-4 accent-[#1a237e]"
+            />
+            Referencia Catastral
+          </label>
+          <label class="inline-flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              id="input-mode-coordinates"
+              name="input_mode"
+              value="coordinates"
+              class="h-4 w-4 accent-[#1a237e]"
+            />
+            Coordenadas GPS actuales
+          </label>
+        </div>
+      </div>
+
+      <div id="cadastral-input-group" class="mb-5">
         <label for="cadastral-reference" class="block text-xs font-semibold text-slate-600 mb-1">
           Referencia Catastral <span aria-hidden="true">*</span>
         </label>
@@ -81,6 +110,43 @@
         <span class="hidden text-xs text-red-600 mt-1 block" id="cadastral-reference-error">La Referencia Catastral debe tener exactamente 20 caracteres alfanuméricos.</span>
       </div>
 
+      <div id="coordinates-input-group" class="mb-5 hidden">
+        <p class="text-xs text-slate-600 mb-2">
+          Puedes permitir el acceso a tu ubicación actual o introducirla manualmente.
+        </p>
+        <button
+          type="button"
+          id="detect-coordinates-btn"
+          class="w-full mb-3 py-2.5 bg-slate-100 text-slate-700 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-slate-200"
+        >
+          Usar mi ubicación actual
+        </button>
+
+        <label for="coordinate-x" class="block text-xs font-semibold text-slate-600 mb-1">
+          Coordenada X (Longitud) <span aria-hidden="true">*</span>
+        </label>
+        <input
+          type="text"
+          id="coordinate-x"
+          name="coordinate_x"
+          autocomplete="off"
+          class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base text-slate-800 outline-none transition-colors focus:border-[#1a237e] focus:ring-2 focus:ring-[#1a237e]/10"
+        />
+        <span class="hidden text-xs text-red-600 mt-1 block" id="coordinate-x-error">Introduce una longitud válida.</span>
+
+        <label for="coordinate-y" class="block text-xs font-semibold text-slate-600 mt-3 mb-1">
+          Coordenada Y (Latitud) <span aria-hidden="true">*</span>
+        </label>
+        <input
+          type="text"
+          id="coordinate-y"
+          name="coordinate_y"
+          autocomplete="off"
+          class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base text-slate-800 outline-none transition-colors focus:border-[#1a237e] focus:ring-2 focus:ring-[#1a237e]/10"
+        />
+        <span class="hidden text-xs text-red-600 mt-1 block" id="coordinate-y-error">Introduce una latitud válida.</span>
+      </div>
+
       <div id="cadastral-reference-duplicate-error" class="hidden bg-red-50 border border-red-300 rounded-lg px-4 py-3 text-red-700 text-sm mb-4" role="alert">
         Esta Referencia Catastral ya ha sido registrada. Si crees que es un error, contacta con nosotros.
       </div>
@@ -97,7 +163,7 @@
             class="mt-0.5 h-4 w-4 flex-shrink-0 accent-[#1a237e] cursor-pointer"
           />
           <span class="text-xs text-slate-600 leading-relaxed">
-            Acepto que mis datos (nombre, correo electrónico y Referencia Catastral) sean compartidos con
+            Acepto que mis datos (nombre, correo electrónico, Referencia Catastral y, si se facilitan, coordenadas) sean compartidos con
             <strong>Movistar</strong> para gestionar la solicitud de instalación de fibra óptica en mi zona.
             <span class="sr-only">(obligatorio)</span>
           </span>
@@ -233,6 +299,10 @@
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
     }
 
+    function getInputMode() {
+      return $('input-mode-coordinates').checked ? 'coordinates' : 'cadastral_reference';
+    }
+
     function setError(inputId, show) {
       const input = $(inputId);
       const errEl = $(inputId + '-error');
@@ -274,7 +344,36 @@
       return /^[A-Z0-9]{20}$/.test(val.trim().toUpperCase());
     }
 
-    function validate(nombre, email, cadastralRef, consent) {
+    function isValidCoordinateX(val) {
+      const parsed = Number(val);
+      return Number.isFinite(parsed) && parsed >= -180 && parsed <= 180;
+    }
+
+    function isValidCoordinateY(val) {
+      const parsed = Number(val);
+      return Number.isFinite(parsed) && parsed >= -90 && parsed <= 90;
+    }
+
+    function applyInputModeState() {
+      const mode = getInputMode();
+      const isCoordinates = mode === 'coordinates';
+
+      $('cadastral-input-group').classList.toggle('hidden', isCoordinates);
+      $('coordinates-input-group').classList.toggle('hidden', !isCoordinates);
+
+      $('cadastral-reference').required = !isCoordinates;
+      $('coordinate-x').required = isCoordinates;
+      $('coordinate-y').required = isCoordinates;
+
+      if (isCoordinates) {
+        setError('cadastral-reference', false);
+      } else {
+        setError('coordinate-x', false);
+        setError('coordinate-y', false);
+      }
+    }
+
+    function validate(nombre, email, cadastralRef, coordinateX, coordinateY, inputMode, consent) {
       let ok = true;
 
       if (!nombre.trim()) {
@@ -291,11 +390,32 @@
         setError('email', false);
       }
 
-      if (!cadastralRef.trim() || !isValidCadastralRef(cadastralRef)) {
-        setError('cadastral-reference', true);
-        ok = false;
-      } else {
+      if (inputMode === 'coordinates') {
+        if (!coordinateX.trim() || !isValidCoordinateX(coordinateX)) {
+          setError('coordinate-x', true);
+          ok = false;
+        } else {
+          setError('coordinate-x', false);
+        }
+
+        if (!coordinateY.trim() || !isValidCoordinateY(coordinateY)) {
+          setError('coordinate-y', true);
+          ok = false;
+        } else {
+          setError('coordinate-y', false);
+        }
+
         setError('cadastral-reference', false);
+      } else {
+        if (!cadastralRef.trim() || !isValidCadastralRef(cadastralRef)) {
+          setError('cadastral-reference', true);
+          ok = false;
+        } else {
+          setError('cadastral-reference', false);
+        }
+
+        setError('coordinate-x', false);
+        setError('coordinate-y', false);
       }
 
       if (!consent) {
@@ -314,13 +434,16 @@
       const nombre         = $('nombre').value;
       const email          = $('email').value;
       const cadastralRef   = $('cadastral-reference').value;
+      const coordinateX    = $('coordinate-x').value;
+      const coordinateY    = $('coordinate-y').value;
+      const inputMode      = getInputMode();
       const consent        = $('consent').checked;
       const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value || '';
 
       hideServerError();
       $('cadastral-reference-duplicate-error').classList.add('hidden');
 
-      if (!validate(nombre, email, cadastralRef, consent)) return;
+      if (!validate(nombre, email, cadastralRef, coordinateX, coordinateY, inputMode, consent)) return;
 
       const btn = $('submit-btn');
       btn.disabled = true;
@@ -333,7 +456,10 @@
           body: JSON.stringify({
             nombre: nombre.trim(),
             email: email.trim(),
-            cadastral_reference: cadastralRef.trim().toUpperCase(),
+            input_mode: inputMode,
+            cadastral_reference: inputMode === 'cadastral_reference' ? cadastralRef.trim().toUpperCase() : '',
+            coordinate_x: inputMode === 'coordinates' ? String(Number(coordinateX.trim())) : null,
+            coordinate_y: inputMode === 'coordinates' ? String(Number(coordinateY.trim())) : null,
             turnstileToken,
           })
         });
@@ -370,6 +496,40 @@
       this.value = this.value.toUpperCase();
       this.setSelectionRange(pos, pos);
     });
+
+    $('input-mode-cadastral').addEventListener('change', applyInputModeState);
+    $('input-mode-coordinates').addEventListener('change', applyInputModeState);
+
+    $('detect-coordinates-btn').addEventListener('click', function () {
+      hideServerError();
+
+      if (!navigator.geolocation) {
+        showServerError('Tu navegador no soporta geolocalización.');
+        return;
+      }
+
+      this.disabled = true;
+      this.textContent = 'Obteniendo ubicación…';
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          $('coordinate-x').value = position.coords.longitude.toFixed(6);
+          $('coordinate-y').value = position.coords.latitude.toFixed(6);
+          setError('coordinate-x', false);
+          setError('coordinate-y', false);
+          this.disabled = false;
+          this.textContent = 'Usar mi ubicación actual';
+        },
+        () => {
+          showServerError('No se pudo obtener tu ubicación. Revisa los permisos del navegador.');
+          this.disabled = false;
+          this.textContent = 'Usar mi ubicación actual';
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    });
+
+    applyInputModeState();
   })();
 </script>
 {% endblock %}

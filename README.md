@@ -5,8 +5,9 @@ A Spanish-language sign-up form that lets residents register their interest in g
 ## Features
 
 - 🇪🇸 Fully in Spanish
-- Fields: **Nombre**, **Correo electrónico**, **CRU** (unique identifier per connection point)
-- Duplicate CRU detection — each address can only register once
+- Fields: **Nombre**, **Correo electrónico**, and either **Referencia Catastral** or **coordenadas GPS**
+- Coordinate mode: browser geolocation (with permission) + server-side conversion to Referencia Catastral via Catastro API
+- Duplicate cadastral reference detection — each address can only register once
 - Confirmation email dispatched asynchronously via Symfony Messenger → Amazon SES
 - Rate limiting: max **150 SES emails per 24 hours** (enforced in the message handler)
 - Unsubscribe link in every confirmation email (GDPR-compliant removal)
@@ -115,7 +116,7 @@ GET /api/export?token=<EXPORT_SECRET>
 
 Returns a UTF-8 CSV (BOM-prefixed for Excel compatibility):
 
-| ID | Nombre | Email | CRU | Fecha de Registro |
+| ID | Nombre | Email | Referencia Catastral | Coordenada X | Coordenada Y | Fecha de Registro |
 
 ---
 
@@ -133,6 +134,6 @@ Visit `http://localhost:8000` for the sign-up form.
 
 ---
 
-## What is a CRU?
+## What is a Referencia Catastral?
 
-The **CRU** (Código de Referencia Único de Punto de Suministro) is a unique reference code printed on every Spanish electricity or gas bill. It uniquely identifies the supply point (i.e. the address), making it the ideal key to measure per-address interest without collecting sensitive personal data such as a full postal address.
+The **Referencia Catastral** is a unique identifier used in Spain to identify properties. It allows measuring per-address demand for optic-fiber rollout while keeping the collected data minimal.

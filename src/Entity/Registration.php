@@ -33,12 +33,27 @@ class Registration
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
-    public function __construct(string $nombre, string $email, string $cadastralReference, string $unsubscribeToken)
+    #[ORM\Column(name: 'coordinate_x', type: 'float', nullable: true)]
+    private ?float $coordinateX = null;
+
+    #[ORM\Column(name: 'coordinate_y', type: 'float', nullable: true)]
+    private ?float $coordinateY = null;
+
+    public function __construct(
+        string $nombre,
+        string $email,
+        string $cadastralReference,
+        string $unsubscribeToken,
+        ?float $coordinateX = null,
+        ?float $coordinateY = null,
+    )
     {
         $this->nombre = $nombre;
         $this->email = $email;
         $this->cadastralReference = $cadastralReference;
         $this->unsubscribeToken = $unsubscribeToken;
+        $this->coordinateX = $coordinateX;
+        $this->coordinateY = $coordinateY;
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -70,5 +85,15 @@ class Registration
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getCoordinateX(): ?float
+    {
+        return $this->coordinateX;
+    }
+
+    public function getCoordinateY(): ?float
+    {
+        return $this->coordinateY;
     }
 }

@@ -46,7 +46,7 @@ final class ExportController extends AbstractController
             // BOM for Excel compatibility
             fwrite($handle, "\xEF\xBB\xBF");
 
-            fputcsv($handle, ['ID', 'Nombre', 'Email', 'Referencia Catastral', 'Fecha de Registro']);
+            fputcsv($handle, ['ID', 'Nombre', 'Email', 'Referencia Catastral', 'Coordenada X', 'Coordenada Y', 'Fecha de Registro']);
 
             foreach ($registrations as $registration) {
                 fputcsv($handle, [
@@ -54,6 +54,8 @@ final class ExportController extends AbstractController
                     $registration->getNombre(),
                     $registration->getEmail(),
                     $registration->getCadastralReference(),
+                    $registration->getCoordinateX(),
+                    $registration->getCoordinateY(),
                     $registration->getCreatedAt()->format('Y-m-d H:i:s'),
                 ]);
             }
