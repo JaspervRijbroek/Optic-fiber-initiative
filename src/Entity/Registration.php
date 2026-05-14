@@ -33,6 +33,12 @@ class Registration
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
+    #[ORM\Column(name: 'gps_latitude', type: 'float', nullable: true)]
+    private ?float $gpsLatitude = null;
+
+    #[ORM\Column(name: 'gps_longitude', type: 'float', nullable: true)]
+    private ?float $gpsLongitude = null;
+
     public function __construct(string $nombre, string $email, string $cadastralReference, string $unsubscribeToken)
     {
         $this->nombre = $nombre;
@@ -70,5 +76,21 @@ class Registration
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getGpsLatitude(): ?float
+    {
+        return $this->gpsLatitude;
+    }
+
+    public function getGpsLongitude(): ?float
+    {
+        return $this->gpsLongitude;
+    }
+
+    public function setGpsCoordinates(?float $latitude, ?float $longitude): void
+    {
+        $this->gpsLatitude = $latitude;
+        $this->gpsLongitude = $longitude;
     }
 }
