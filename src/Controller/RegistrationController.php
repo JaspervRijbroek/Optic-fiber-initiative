@@ -7,6 +7,9 @@ namespace App\Controller;
 use App\Entity\Registration;
 use App\Message\SendConfirmationEmail;
 use App\Repository\RegistrationRepository;
+use App\Service\CadastralReferenceService;
+use App\Service\Exception\CadastralReferenceException;
+use App\Service\Exception\CadastralReferenceNotFoundException;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,6 +25,7 @@ final class RegistrationController extends AbstractController
 {
     public function __construct(
         private readonly HttpClientInterface $httpClient,
+        private readonly CadastralReferenceService $cadastralReferenceService,
         private readonly EntityManagerInterface $em,
         private readonly RegistrationRepository $registrationRepository,
         private readonly MessageBusInterface $bus,
@@ -112,50 +116,68 @@ final class RegistrationController extends AbstractController
             return $this->json(['error' => 'Coordenadas GPS no válidas.'], Response::HTTP_BAD_REQUEST);
         }
 
+        if (!$this->isWithinSpain($latitude, $longitude)) {
+            return $this->json(['error' => 'Las coordenadas GPS están fuera del territorio español.'], Response::HTTP_BAD_REQUEST);
+        }
+
         try {
-            $response = $this->httpClient->request(
-                'GET',
-                'http://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCoordenadas.svc/rest/Consulta_RCCOOR_Distancia',
-                [
-                    'query' => [
-                        'CoorX' => (string) $longitude,
-                        'CoorY' => (string) $latitude,
-                        'SRS' => 'EPSG:4326',
-                    ],
-                ]
+            $result = $this->cadastralReferenceService->resolveFromCoordinates($latitude, $longitude);
+        } catch (CadastralReferenceNotFoundException $e) {
+            $this->logger->info('No cadastral reference found for coordinates.', [
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'exception' => $e,
+            ]);
+
+            return $this->json(
+                ['error' => 'No se ha encontrado una Referencia Catastral para esta ubicación.'],
+                Response::HTTP_NOT_FOUND
             );
-
-            if ($response->getStatusCode() >= Response::HTTP_BAD_REQUEST) {
-                return $this->json(['error' => 'No se pudo consultar Catastro en este momento.'], Response::HTTP_BAD_GATEWAY);
-            }
-
-            $payload = json_decode($response->getContent(false), true);
-            if (!is_array($payload)) {
-                return $this->json(['error' => 'Respuesta inesperada del Catastro.'], Response::HTTP_BAD_GATEWAY);
-            }
-
-            $cadastralReference = $this->findCadastralReference($payload);
-            if ($cadastralReference === null) {
-                return $this->json(
-                    ['error' => 'No se ha encontrado una Referencia Catastral para esta ubicación.'],
-                    Response::HTTP_NOT_FOUND
-                );
-            }
-
-            $request->getSession()->set('gps_latitude', $latitude);
-            $request->getSession()->set('gps_longitude', $longitude);
-            $request->getSession()->set('gps_cadastral_reference', $cadastralReference);
-
-            return $this->json(['cadastral_reference' => $cadastralReference], Response::HTTP_OK);
-        } catch (\Throwable $exception) {
+        } catch (CadastralReferenceException $e) {
             $this->logger->warning('Catastro cadastral-reference lookup failed.', [
-                'exception' => $exception,
+                'exception' => $e,
                 'latitude' => $latitude,
                 'longitude' => $longitude,
             ]);
 
             return $this->json(['error' => 'No se pudo obtener la Referencia Catastral automáticamente.'], Response::HTTP_BAD_GATEWAY);
         }
+
+        $request->getSession()->set('gps_latitude', $latitude);
+        $request->getSession()->set('gps_longitude', $longitude);
+        $request->getSession()->set('gps_cadastral_reference', $result['reference']);
+
+        return $this->json([
+            'cadastral_reference' => $result['reference'],
+            'address' => $result['address'],
+        ], Response::HTTP_OK);
+    }
+
+    #[Route('/address-from-cadastral-reference', name: 'api_address_from_cadastral_reference', methods: ['GET', 'OPTIONS'])]
+    public function addressFromCadastralReference(Request $request): JsonResponse
+    {
+        if ($request->isMethod('OPTIONS')) {
+            return $this->corsResponse();
+        }
+
+        $reference = strtoupper(trim((string) $request->query->get('reference', '')));
+
+        if (!preg_match('/^[A-Z0-9]{20}$/', $reference)) {
+            return $this->json(['error' => 'Referencia Catastral no válida.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $address = $this->cadastralReferenceService->resolveAddressFromReference($reference);
+        } catch (CadastralReferenceException $e) {
+            $this->logger->info('Could not resolve address for cadastral reference.', [
+                'reference' => $reference,
+                'exception' => $e,
+            ]);
+
+            return $this->json(['error' => 'No se pudo obtener la dirección para esta Referencia Catastral.'], Response::HTTP_BAD_GATEWAY);
+        }
+
+        return $this->json(['address' => $address], Response::HTTP_OK);
     }
 
     private function verifyTurnstile(string $token, ?string $ip): bool
@@ -192,29 +214,10 @@ final class RegistrationController extends AbstractController
         return $latitude >= -90.0 && $latitude <= 90.0 && $longitude >= -180.0 && $longitude <= 180.0;
     }
 
-    private function findCadastralReference(mixed $payload): ?string
+    private function isWithinSpain(float $latitude, float $longitude): bool
     {
-        if (is_string($payload)) {
-            $candidate = strtoupper(trim($payload));
-            if (preg_match('/^[A-Z0-9]{20}$/', $candidate)) {
-                return $candidate;
-            }
-
-            return null;
-        }
-
-        if (!is_array($payload)) {
-            return null;
-        }
-
-        foreach ($payload as $value) {
-            $found = $this->findCadastralReference($value);
-            if ($found !== null) {
-                return $found;
-            }
-        }
-
-        return null;
+        // Bounding box covering mainland Spain, the Canary Islands, Ceuta, and Melilla.
+        return $latitude >= 27.6 && $latitude <= 43.8 && $longitude >= -18.2 && $longitude <= 4.3;
     }
 
     private function getSessionLatitude(Request $request, string $cadastralReference): ?float

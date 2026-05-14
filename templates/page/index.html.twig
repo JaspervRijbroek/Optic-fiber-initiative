@@ -86,6 +86,11 @@
           </button>
         </div>
         <span class="hidden text-xs text-red-600 mt-1 block" id="cadastral-reference-gps-error"></span>
+        <div id="cadastral-reference-gps-status" class="hidden mt-1 text-xs text-slate-500" aria-live="polite"></div>
+        <div id="cadastral-reference-gps-warning" class="hidden mt-2 bg-yellow-50 border border-yellow-300 rounded-lg px-3 py-2 text-xs text-yellow-800" role="alert"></div>
+        <div id="cadastral-address" class="hidden mt-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-800" aria-live="polite">
+          <span class="font-semibold">📍 Dirección:</span> <span id="cadastral-address-text"></span>
+        </div>
         <div class="mt-2 bg-[#e8eaf6] rounded-lg px-3 py-2.5 text-xs text-[#1a237e] leading-relaxed">
           ℹ️ <strong>¿Dónde encontrarla?</strong> En el recibo del IBI (Impuesto sobre Bienes Inmuebles),
           en la escritura de tu propiedad, o consultándola en la
@@ -297,6 +302,45 @@
       el.classList.remove('hidden');
     }
 
+    function setGpsStatus(message) {
+      const el = $('cadastral-reference-gps-status');
+      if (!el) return;
+      if (!message) {
+        el.textContent = '';
+        el.classList.add('hidden');
+        return;
+      }
+
+      el.textContent = message;
+      el.classList.remove('hidden');
+    }
+
+    function setGpsWarning(message) {
+      const el = $('cadastral-reference-gps-warning');
+      if (!el) return;
+      if (!message) {
+        el.textContent = '';
+        el.classList.add('hidden');
+        return;
+      }
+
+      el.textContent = message;
+      el.classList.remove('hidden');
+    }
+
+    function setCadastralAddress(address) {
+      const container = $('cadastral-address');
+      const text = $('cadastral-address-text');
+      if (!container || !text) return;
+      if (!address) {
+        container.classList.add('hidden');
+        text.textContent = '';
+        return;
+      }
+      text.textContent = address;
+      container.classList.remove('hidden');
+    }
+
     function isValidCadastralRef(val) {
       return /^[A-Z0-9]{20}$/.test(val.trim().toUpperCase());
     }
@@ -396,11 +440,33 @@
       const pos = this.selectionStart;
       this.value = this.value.toUpperCase();
       this.setSelectionRange(pos, pos);
+
+      const val = this.value.trim();
+      if (!isValidCadastralRef(val)) {
+        setCadastralAddress('');
+        return;
+      }
+
+      // Debounce address lookup when reference is valid
+      clearTimeout(window._cadastralAddressTimer);
+      window._cadastralAddressTimer = setTimeout(async function () {
+        try {
+          const res = await fetch('/api/address-from-cadastral-reference?reference=' + encodeURIComponent(val));
+          if (!res.ok) return;
+          const data = await res.json().catch(() => ({}));
+          setCadastralAddress(data.address || '');
+        } catch {
+          // Fail silently — address display is informational only
+        }
+      }, 300);
     });
 
     $('cadastral-reference-gps-btn').addEventListener('click', async function () {
       hideServerError();
       setGpsError('');
+      setGpsStatus('');
+      setGpsWarning('');
+      setCadastralAddress('');
 
       const isHome = window.confirm('¿Estás en casa en este momento?');
       if (!isHome) return;
@@ -413,21 +479,65 @@
       const gpsBtn = this;
       gpsBtn.disabled = true;
 
+      const MAX_RETRIES = 5;
+      const ACCURACY_THRESHOLD_M = 50;
+
+      let bestPosition = null;
+
       try {
-        const position = await new Promise(function (resolve, reject) {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 0,
-          });
-        });
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+          setGpsStatus(`Obteniendo tu ubicación GPS… (intento ${attempt} de ${MAX_RETRIES})`);
+
+          let position;
+          try {
+            position = await new Promise(function (resolve, reject) {
+              navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 0,
+              });
+            });
+          } catch (error) {
+            if (error && typeof error === 'object' && 'code' in error) {
+              if (error.code === 1) {
+                setGpsError('Has denegado el permiso de ubicación.');
+              } else if (error.code === 2) {
+                setGpsError('No se ha podido obtener tu ubicación.');
+              } else if (error.code === 3) {
+                setGpsError('Se agotó el tiempo al intentar obtener tu ubicación.');
+              } else {
+                setGpsError('No hemos podido obtener tu ubicación GPS.');
+              }
+            } else {
+              setGpsError('No hemos podido obtener tu ubicación GPS.');
+            }
+            return;
+          }
+
+          if (bestPosition === null || position.coords.accuracy < bestPosition.coords.accuracy) {
+            bestPosition = position;
+          }
+
+          if (position.coords.accuracy <= ACCURACY_THRESHOLD_M) {
+            break;
+          }
+        }
+
+        setGpsStatus('');
+
+        if (!bestPosition) {
+          setGpsError('No hemos podido obtener tu ubicación GPS.');
+          return;
+        }
+
+        const accuracyExceeded = bestPosition.coords.accuracy > ACCURACY_THRESHOLD_M;
 
         const res = await fetch('/api/cadastral-reference-from-coordinates', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
+            latitude: bestPosition.coords.latitude,
+            longitude: bestPosition.coords.longitude,
           })
         });
 
@@ -442,21 +552,16 @@
 
         $('cadastral-reference').value = data.cadastral_reference.toUpperCase();
         setError('cadastral-reference', false);
-      } catch (error) {
-        if (error && typeof error === 'object' && 'code' in error) {
-          if (error.code === 1) {
-            setGpsError('Has denegado el permiso de ubicación.');
-          } else if (error.code === 2) {
-            setGpsError('No se ha podido obtener tu ubicación.');
-          } else if (error.code === 3) {
-            setGpsError('Se agotó el tiempo al intentar obtener tu ubicación.');
-          } else {
-            setGpsError('No hemos podido obtener tu ubicación GPS.');
-          }
-        } else {
-          setGpsError('No hemos podido obtener tu ubicación GPS.');
+        setCadastralAddress(data.address || '');
+
+        if (accuracyExceeded) {
+          const accuracy = Math.round(bestPosition.coords.accuracy);
+          setGpsWarning(
+            `⚠️ La precisión GPS obtenida es baja (±${accuracy} m). Verifica que la referencia catastral corresponde a tu vivienda.`
+          );
         }
       } finally {
+        setGpsStatus('');
         gpsBtn.disabled = false;
       }
     });
