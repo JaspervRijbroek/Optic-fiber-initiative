@@ -230,6 +230,10 @@
     'use strict';
 
     const $ = (id) => document.getElementById(id);
+    const MAX_MOBILE_WIDTH_PX = 1024;
+    const GEOLOCATION_PERMISSION_DENIED = 1;
+    const GEOLOCATION_POSITION_UNAVAILABLE = 2;
+    const GEOLOCATION_TIMEOUT = 3;
 
     // Build share URLs once and set on all share links
     (function initShareLinks() {
@@ -344,7 +348,7 @@
     function isLikelyMobileDevice() {
       const hasTouch = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
       const coarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-      const smallScreen = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
+      const smallScreen = window.matchMedia && window.matchMedia(`(max-width: ${MAX_MOBILE_WIDTH_PX}px)`).matches;
       return hasTouch && (coarsePointer || smallScreen);
     }
 
@@ -355,15 +359,15 @@
           : 'No hemos podido obtener tu ubicación GPS.';
       }
 
-      if (error.code === 1) {
+      if (error.code === GEOLOCATION_PERMISSION_DENIED) {
         return isPermissionRequest
           ? 'No has concedido permiso de ubicación en el móvil.'
           : 'Has denegado el permiso de ubicación.';
       }
-      if (error.code === 2) {
+      if (error.code === GEOLOCATION_POSITION_UNAVAILABLE) {
         return 'No se ha podido obtener tu ubicación.';
       }
-      if (error.code === 3) {
+      if (error.code === GEOLOCATION_TIMEOUT) {
         return 'Se agotó el tiempo al intentar obtener tu ubicación.';
       }
       return isPermissionRequest
@@ -527,8 +531,8 @@
             try {
               const permission = await navigator.permissions.query({ name: 'geolocation' });
               permissionState = permission.state;
-            } catch {
-              // Ignore unsupported Permissions API errors and fallback to geolocation request.
+            } catch (error) {
+              console.debug('Permissions API geolocation check failed', error);
             }
           }
 
