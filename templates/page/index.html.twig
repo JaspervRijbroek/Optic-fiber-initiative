@@ -341,8 +341,10 @@
       container.classList.remove('hidden');
     }
 
-    function isMobileDevice() {
-      return /Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent || '');
+    function shouldRequestMobileGpsPermission() {
+      const hasTouch = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
+      const coarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+      return hasTouch && coarsePointer;
     }
 
     function isValidCadastralRef(val) {
@@ -482,11 +484,12 @@
 
       const MAX_RETRIES = 5;
       const ACCURACY_THRESHOLD_M = 50;
+      const GEOLOCATION_PERMISSION_DENIED = 1;
 
       let bestPosition = null;
 
       try {
-        if (isMobileDevice()) {
+        if (shouldRequestMobileGpsPermission()) {
           setGpsStatus('Solicitando permiso de ubicación…');
           try {
             await new Promise(function (resolve, reject) {
@@ -497,7 +500,7 @@
               });
             });
           } catch (error) {
-            if (error && typeof error === 'object' && 'code' in error && error.code === 1) {
+            if (error && typeof error === 'object' && 'code' in error && error.code === GEOLOCATION_PERMISSION_DENIED) {
               setGpsError('No has concedido permiso de ubicación en el móvil.');
             } else {
               setGpsError('No hemos podido solicitar el permiso de ubicación en el móvil.');
@@ -523,7 +526,7 @@
             });
           } catch (error) {
             if (error && typeof error === 'object' && 'code' in error) {
-              if (error.code === 1) {
+              if (error.code === GEOLOCATION_PERMISSION_DENIED) {
                 setGpsError('Has denegado el permiso de ubicación.');
               } else if (error.code === 2) {
                 setGpsError('No se ha podido obtener tu ubicación.');
