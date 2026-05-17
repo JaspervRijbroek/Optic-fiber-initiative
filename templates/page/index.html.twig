@@ -341,7 +341,7 @@
       container.classList.remove('hidden');
     }
 
-    function shouldRequestMobileGpsPermission() {
+    function isLikelyMobileDevice() {
       const hasTouch = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
       const coarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
       const smallScreen = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
@@ -518,20 +518,37 @@
       let initialPosition = null;
 
       try {
-        if (shouldRequestMobileGpsPermission()) {
-          setGpsStatus('Solicitando permiso de ubicación…');
-          try {
-            initialPosition = await new Promise(function (resolve, reject) {
-              navigator.geolocation.getCurrentPosition(resolve, reject, GEOLOCATION_OPTIONS);
-            });
-          } catch (error) {
-            setGpsError(getGeolocationErrorMessage(error, true));
-            return;
-          }
-        }
-
         const isHome = window.confirm('¿Estás en casa en este momento?');
         if (!isHome) return;
+
+        if (isLikelyMobileDevice()) {
+          let permissionState = 'prompt';
+          if (navigator.permissions && typeof navigator.permissions.query === 'function') {
+            try {
+              const permission = await navigator.permissions.query({ name: 'geolocation' });
+              permissionState = permission.state;
+            } catch {
+              // Ignore unsupported Permissions API errors and fallback to geolocation request.
+            }
+          }
+
+          if (permissionState === 'denied') {
+            setGpsError('No has concedido permiso de ubicación en el móvil.');
+            return;
+          }
+
+          if (permissionState !== 'granted') {
+            setGpsStatus('Solicitando permiso de ubicación…');
+            try {
+              initialPosition = await new Promise(function (resolve, reject) {
+                navigator.geolocation.getCurrentPosition(resolve, reject, GEOLOCATION_OPTIONS);
+              });
+            } catch (error) {
+              setGpsError(getGeolocationErrorMessage(error, true));
+              return;
+            }
+          }
+        }
 
         for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
           setGpsStatus(`Obteniendo tu ubicación GPS… (intento ${attempt} de ${MAX_RETRIES})`);
