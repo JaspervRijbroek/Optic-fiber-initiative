@@ -352,15 +352,15 @@
       return hasTouch && (coarsePointer || smallScreen);
     }
 
-    function getGeolocationErrorMessage(error, isPermissionRequest = false) {
+    function getGeolocationErrorMessage(error, isDuringPermissionRequest = false) {
       if (!(error && typeof error === 'object' && 'code' in error)) {
-        return isPermissionRequest
+        return isDuringPermissionRequest
           ? 'No hemos podido solicitar el permiso de ubicación en el móvil.'
           : 'No hemos podido obtener tu ubicación GPS.';
       }
 
       if (error.code === GEOLOCATION_PERMISSION_DENIED) {
-        return isPermissionRequest
+        return isDuringPermissionRequest
           ? 'No has concedido permiso de ubicación en el móvil.'
           : 'Has denegado el permiso de ubicación.';
       }
@@ -370,9 +370,15 @@
       if (error.code === GEOLOCATION_TIMEOUT) {
         return 'Se agotó el tiempo al intentar obtener tu ubicación.';
       }
-      return isPermissionRequest
+      return isDuringPermissionRequest
         ? 'No hemos podido solicitar el permiso de ubicación en el móvil.'
         : 'No hemos podido obtener tu ubicación GPS.';
+    }
+
+    function getCurrentPositionAsync(options) {
+      return new Promise(function (resolve, reject) {
+        navigator.geolocation.getCurrentPosition(resolve, reject, options);
+      });
     }
 
     function isValidCadastralRef(val) {
@@ -544,9 +550,7 @@
           if (permissionState !== 'granted') {
             setGpsStatus('Solicitando permiso de ubicación…');
             try {
-              initialPosition = await new Promise(function (resolve, reject) {
-                navigator.geolocation.getCurrentPosition(resolve, reject, GEOLOCATION_OPTIONS);
-              });
+              initialPosition = await getCurrentPositionAsync(GEOLOCATION_OPTIONS);
             } catch (error) {
               setGpsError(getGeolocationErrorMessage(error, true));
               return;
@@ -562,9 +566,7 @@
             if (attempt === 1 && initialPosition) {
               position = initialPosition;
             } else {
-              position = await new Promise(function (resolve, reject) {
-                navigator.geolocation.getCurrentPosition(resolve, reject, GEOLOCATION_OPTIONS);
-              });
+              position = await getCurrentPositionAsync(GEOLOCATION_OPTIONS);
             }
           } catch (error) {
             setGpsError(getGeolocationErrorMessage(error));
