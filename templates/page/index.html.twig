@@ -345,7 +345,30 @@
       const hasTouch = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
       const coarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
       const smallScreen = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
-      return hasTouch && coarsePointer && smallScreen;
+      return hasTouch && (coarsePointer || smallScreen);
+    }
+
+    function getGeolocationErrorMessage(error, isPermissionRequest = false) {
+      if (!(error && typeof error === 'object' && 'code' in error)) {
+        return isPermissionRequest
+          ? 'No hemos podido solicitar el permiso de ubicación en el móvil.'
+          : 'No hemos podido obtener tu ubicación GPS.';
+      }
+
+      if (error.code === 1) {
+        return isPermissionRequest
+          ? 'No has concedido permiso de ubicación en el móvil.'
+          : 'Has denegado el permiso de ubicación.';
+      }
+      if (error.code === 2) {
+        return 'No se ha podido obtener tu ubicación.';
+      }
+      if (error.code === 3) {
+        return 'Se agotó el tiempo al intentar obtener tu ubicación.';
+      }
+      return isPermissionRequest
+        ? 'No hemos podido solicitar el permiso de ubicación en el móvil.'
+        : 'No hemos podido obtener tu ubicación GPS.';
     }
 
     function isValidCadastralRef(val) {
@@ -485,7 +508,6 @@
 
       const MAX_RETRIES = 5;
       const ACCURACY_THRESHOLD_M = 50;
-      const GEOLOCATION_PERMISSION_DENIED = 1;
       const GEOLOCATION_OPTIONS = {
         enableHighAccuracy: true,
         timeout: 15000,
@@ -493,20 +515,17 @@
       };
 
       let bestPosition = null;
+      let initialPosition = null;
 
       try {
         if (shouldRequestMobileGpsPermission()) {
           setGpsStatus('Solicitando permiso de ubicación…');
           try {
-            await new Promise(function (resolve, reject) {
+            initialPosition = await new Promise(function (resolve, reject) {
               navigator.geolocation.getCurrentPosition(resolve, reject, GEOLOCATION_OPTIONS);
             });
           } catch (error) {
-            if (error && typeof error === 'object' && 'code' in error && error.code === GEOLOCATION_PERMISSION_DENIED) {
-              setGpsError('No has concedido permiso de ubicación en el móvil.');
-            } else {
-              setGpsError('No hemos podido solicitar el permiso de ubicación en el móvil.');
-            }
+            setGpsError(getGeolocationErrorMessage(error, true));
             return;
           }
         }
@@ -519,23 +538,15 @@
 
           let position;
           try {
-            position = await new Promise(function (resolve, reject) {
-              navigator.geolocation.getCurrentPosition(resolve, reject, GEOLOCATION_OPTIONS);
-            });
-          } catch (error) {
-            if (error && typeof error === 'object' && 'code' in error) {
-              if (error.code === GEOLOCATION_PERMISSION_DENIED) {
-                setGpsError('Has denegado el permiso de ubicación.');
-              } else if (error.code === 2) {
-                setGpsError('No se ha podido obtener tu ubicación.');
-              } else if (error.code === 3) {
-                setGpsError('Se agotó el tiempo al intentar obtener tu ubicación.');
-              } else {
-                setGpsError('No hemos podido obtener tu ubicación GPS.');
-              }
+            if (attempt === 1 && initialPosition) {
+              position = initialPosition;
             } else {
-              setGpsError('No hemos podido obtener tu ubicación GPS.');
+              position = await new Promise(function (resolve, reject) {
+                navigator.geolocation.getCurrentPosition(resolve, reject, GEOLOCATION_OPTIONS);
+              });
             }
+          } catch (error) {
+            setGpsError(getGeolocationErrorMessage(error));
             return;
           }
 
