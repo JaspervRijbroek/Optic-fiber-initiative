@@ -344,7 +344,8 @@
     function shouldRequestMobileGpsPermission() {
       const hasTouch = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
       const coarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-      return hasTouch && coarsePointer;
+      const smallScreen = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
+      return hasTouch && coarsePointer && smallScreen;
     }
 
     function isValidCadastralRef(val) {
@@ -485,6 +486,11 @@
       const MAX_RETRIES = 5;
       const ACCURACY_THRESHOLD_M = 50;
       const GEOLOCATION_PERMISSION_DENIED = 1;
+      const GEOLOCATION_OPTIONS = {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      };
 
       let bestPosition = null;
 
@@ -493,11 +499,7 @@
           setGpsStatus('Solicitando permiso de ubicación…');
           try {
             await new Promise(function (resolve, reject) {
-              navigator.geolocation.getCurrentPosition(resolve, reject, {
-                enableHighAccuracy: false,
-                timeout: 15000,
-                maximumAge: 60000,
-              });
+              navigator.geolocation.getCurrentPosition(resolve, reject, GEOLOCATION_OPTIONS);
             });
           } catch (error) {
             if (error && typeof error === 'object' && 'code' in error && error.code === GEOLOCATION_PERMISSION_DENIED) {
@@ -518,11 +520,7 @@
           let position;
           try {
             position = await new Promise(function (resolve, reject) {
-              navigator.geolocation.getCurrentPosition(resolve, reject, {
-                enableHighAccuracy: true,
-                timeout: 15000,
-                maximumAge: 0,
-              });
+              navigator.geolocation.getCurrentPosition(resolve, reject, GEOLOCATION_OPTIONS);
             });
           } catch (error) {
             if (error && typeof error === 'object' && 'code' in error) {
