@@ -234,6 +234,8 @@
     const GEOLOCATION_PERMISSION_DENIED = 1;
     const GEOLOCATION_POSITION_UNAVAILABLE = 2;
     const GEOLOCATION_TIMEOUT = 3;
+    const GPS_PERMISSION_REQUEST_ERROR = 'No hemos podido solicitar el permiso de ubicación en el móvil.';
+    const GPS_POSITION_ERROR = 'No hemos podido obtener tu ubicación GPS.';
 
     // Build share URLs once and set on all share links
     (function initShareLinks() {
@@ -345,7 +347,7 @@
       container.classList.remove('hidden');
     }
 
-    function isLikelyMobileDevice() {
+    function isMobileDevice() {
       const hasTouch = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
       const coarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
       const smallScreen = window.matchMedia && window.matchMedia(`(max-width: ${MAX_MOBILE_WIDTH_PX}px)`).matches;
@@ -355,8 +357,8 @@
     function getGeolocationErrorMessage(error, isDuringPermissionRequest = false) {
       if (!(error && typeof error === 'object' && 'code' in error)) {
         return isDuringPermissionRequest
-          ? 'No hemos podido solicitar el permiso de ubicación en el móvil.'
-          : 'No hemos podido obtener tu ubicación GPS.';
+          ? GPS_PERMISSION_REQUEST_ERROR
+          : GPS_POSITION_ERROR;
       }
 
       if (error.code === GEOLOCATION_PERMISSION_DENIED) {
@@ -371,8 +373,8 @@
         return 'Se agotó el tiempo al intentar obtener tu ubicación.';
       }
       return isDuringPermissionRequest
-        ? 'No hemos podido solicitar el permiso de ubicación en el móvil.'
-        : 'No hemos podido obtener tu ubicación GPS.';
+        ? GPS_PERMISSION_REQUEST_ERROR
+        : GPS_POSITION_ERROR;
     }
 
     function getCurrentPositionAsync(options) {
@@ -531,7 +533,7 @@
         const isHome = window.confirm('¿Estás en casa en este momento?');
         if (!isHome) return;
 
-        if (isLikelyMobileDevice()) {
+        if (isMobileDevice()) {
           let permissionState = 'prompt';
           if (navigator.permissions && typeof navigator.permissions.query === 'function') {
             try {
