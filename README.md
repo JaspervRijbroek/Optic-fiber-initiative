@@ -115,7 +115,7 @@ GET /api/export?token=<EXPORT_SECRET>
 
 Returns a UTF-8 CSV (BOM-prefixed for Excel compatibility):
 
-| ID | Nombre | Email | Referencia Catastral | GPS Latitud | GPS Longitud | Fecha de Registro |
+| ID | Nombre | Email | Referencia Catastral | Fecha de Registro |
 
 ---
 

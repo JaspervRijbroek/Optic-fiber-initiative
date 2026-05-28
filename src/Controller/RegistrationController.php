@@ -81,14 +81,9 @@ final class RegistrationController extends AbstractController
         // Persist new registration
         $unsubscribeToken = bin2hex(random_bytes(24));
         $registration = new Registration($nombre, $email, $cadastralReference, $unsubscribeToken);
-        $registration->setGpsCoordinates(
-            $this->getSessionLatitude($request, $cadastralReference),
-            $this->getSessionLongitude($request, $cadastralReference)
-        );
 
         $this->em->persist($registration);
         $this->em->flush();
-        $this->clearGpsSession($request);
 
         // Dispatch confirmation email to the async message queue
         $siteUrl = rtrim($this->siteUrl ?: $request->getSchemeAndHttpHost(), '/');
@@ -142,10 +137,6 @@ final class RegistrationController extends AbstractController
 
             return $this->json(['error' => 'No se pudo obtener la Referencia Catastral automáticamente.'], Response::HTTP_BAD_GATEWAY);
         }
-
-        $request->getSession()->set('gps_latitude', $latitude);
-        $request->getSession()->set('gps_longitude', $longitude);
-        $request->getSession()->set('gps_cadastral_reference', $result['reference']);
 
         return $this->json([
             'cadastral_reference' => $result['reference'],
@@ -220,32 +211,4 @@ final class RegistrationController extends AbstractController
         return $latitude >= 27.6 && $latitude <= 43.8 && $longitude >= -18.2 && $longitude <= 4.3;
     }
 
-    private function getSessionLatitude(Request $request, string $cadastralReference): ?float
-    {
-        return $this->getSessionCoordinate($request, $cadastralReference, 'gps_latitude');
-    }
-
-    private function getSessionLongitude(Request $request, string $cadastralReference): ?float
-    {
-        return $this->getSessionCoordinate($request, $cadastralReference, 'gps_longitude');
-    }
-
-    private function getSessionCoordinate(Request $request, string $cadastralReference, string $coordinateKey): ?float
-    {
-        $sessionReference = strtoupper(trim((string) $request->getSession()->get('gps_cadastral_reference', '')));
-        $coordinate = $request->getSession()->get($coordinateKey);
-
-        if ($sessionReference !== $cadastralReference || !is_numeric($coordinate)) {
-            return null;
-        }
-
-        return (float) $coordinate;
-    }
-
-    private function clearGpsSession(Request $request): void
-    {
-        $request->getSession()->remove('gps_latitude');
-        $request->getSession()->remove('gps_longitude');
-        $request->getSession()->remove('gps_cadastral_reference');
-    }
 }
