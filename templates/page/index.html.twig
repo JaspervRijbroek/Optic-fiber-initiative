@@ -84,6 +84,43 @@
               <path d="M11 2.05v2.02A8.002 8.002 0 0 0 4.07 11H2.05v2h2.02A8.002 8.002 0 0 0 11 19.93v2.02h2v-2.02A8.002 8.002 0 0 0 19.93 13h2.02v-2h-2.02A8.002 8.002 0 0 0 13 4.07V2.05h-2Zm1 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12Zm0 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
             </svg>
           </button>
+          <button
+            type="button"
+            id="cadastral-reference-address-btn"
+            class="inline-flex items-center justify-center px-3 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#1a237e]/20"
+            aria-label="Buscar dirección para obtener referencia catastral"
+            title="Buscar por dirección"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </button>
+          <button
+            type="button"
+            id="cadastral-reference-map-btn"
+            class="inline-flex items-center justify-center px-3 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#1a237e]/20"
+            aria-label="Seleccionar ubicación en el mapa para obtener referencia catastral"
+            title="Seleccionar en el mapa"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>
+            </svg>
+          </button>
+        </div>
+        <!-- Address search panel (shown when search button is clicked) -->
+        <div id="address-search-panel" class="hidden mt-2">
+          <div class="relative">
+            <input
+              type="text"
+              id="address-search-input"
+              placeholder="Escribe tu dirección, calle o localidad…"
+              autocomplete="off"
+              class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-800 outline-none transition-colors focus:border-[#1a237e] focus:ring-2 focus:ring-[#1a237e]/10"
+            />
+            <div id="address-search-spinner" class="hidden absolute right-2 top-2.5 w-4 h-4 border-2 border-slate-300 border-t-[#1a237e] rounded-full animate-spin"></div>
+          </div>
+          <div id="address-search-results" class="hidden mt-1 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden z-10"></div>
+          <div id="address-search-error" class="hidden mt-1 text-xs text-red-600"></div>
         </div>
         <span class="hidden text-xs text-red-600 mt-1 block" id="cadastral-reference-gps-error"></span>
         <div id="cadastral-reference-gps-status" class="hidden mt-1 text-xs text-slate-500" aria-live="polite"></div>
@@ -217,6 +254,41 @@
         </svg>
         Telegram
       </a>
+    </div>
+  </div>
+
+  <!-- Map picker modal -->
+  <div id="map-modal" class="hidden fixed inset-0 z-50 flex flex-col bg-white" role="dialog" aria-modal="true" aria-label="Seleccionar ubicación en el mapa">
+    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-white shrink-0">
+      <div>
+        <p class="text-sm font-semibold text-[#1a237e]">Selecciona tu vivienda en el mapa</p>
+        <p class="text-xs text-slate-500">Haz clic en el mapa o arrastra el marcador hasta tu casa</p>
+      </div>
+      <button
+        type="button"
+        id="map-modal-close"
+        class="ml-3 p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#1a237e]/20"
+        aria-label="Cerrar mapa"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div id="map-container" class="flex-1 relative">
+      <div id="leaflet-map" class="w-full h-full"></div>
+    </div>
+    <div class="px-4 py-3 border-t border-slate-200 bg-white shrink-0 flex flex-col gap-2">
+      <div id="map-modal-coords" class="text-xs text-slate-500 text-center hidden"></div>
+      <div id="map-modal-error" class="hidden text-xs text-red-600 text-center"></div>
+      <div id="map-modal-status" class="hidden text-xs text-slate-500 text-center"></div>
+      <button
+        type="button"
+        id="map-modal-confirm"
+        class="w-full py-2.5 bg-[#1a237e] text-white rounded-lg text-sm font-semibold transition-colors hover:bg-[#283593] disabled:bg-slate-400 disabled:cursor-not-allowed"
+      >
+        Confirmar ubicación
+      </button>
     </div>
   </div>
 
@@ -626,6 +698,274 @@
         gpsBtn.disabled = false;
       }
     });
+
+    // ─── Address search ────────────────────────────────────────────────────────
+
+    async function resolveCoordinatesToCadastral(lat, lon) {
+      setGpsStatus('Buscando Referencia Catastral…');
+      try {
+        const res = await fetch('/api/cadastral-reference-from-coordinates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ latitude: parseFloat(lat), longitude: parseFloat(lon) }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.cadastral_reference) {
+          return { error: data.error || 'No se encontró Referencia Catastral para esta ubicación.' };
+        }
+        return { reference: data.cadastral_reference.toUpperCase(), address: data.address || '' };
+      } finally {
+        setGpsStatus('');
+      }
+    }
+
+    (function initAddressSearch() {
+      const btn       = $('cadastral-reference-address-btn');
+      const panel     = $('address-search-panel');
+      const input     = $('address-search-input');
+      const spinner   = $('address-search-spinner');
+      const results   = $('address-search-results');
+      const errorEl   = $('address-search-error');
+
+      if (!btn || !panel) return;
+
+      btn.addEventListener('click', function () {
+        const isOpen = !panel.classList.contains('hidden');
+        panel.classList.toggle('hidden', isOpen);
+        if (!isOpen) {
+          input.value = '';
+          results.classList.add('hidden');
+          results.innerHTML = '';
+          errorEl.classList.add('hidden');
+          input.focus();
+        }
+      });
+
+      let searchTimer = null;
+
+      input.addEventListener('input', function () {
+        const q = this.value.trim();
+        errorEl.classList.add('hidden');
+        results.classList.add('hidden');
+        results.innerHTML = '';
+        clearTimeout(searchTimer);
+
+        if (q.length < 3) return;
+
+        spinner.classList.remove('hidden');
+
+        searchTimer = setTimeout(async function () {
+          try {
+            const res = await fetch('/api/address-search?q=' + encodeURIComponent(q));
+            const data = await res.json().catch(() => ([]));
+
+            spinner.classList.add('hidden');
+
+            if (!res.ok) {
+              errorEl.textContent = (data && data.error) || 'Error al buscar la dirección.';
+              errorEl.classList.remove('hidden');
+              return;
+            }
+
+            if (!Array.isArray(data) || data.length === 0) {
+              errorEl.textContent = 'No se han encontrado resultados.';
+              errorEl.classList.remove('hidden');
+              return;
+            }
+
+            results.innerHTML = '';
+            data.forEach(function (item) {
+              const li = document.createElement('button');
+              li.type = 'button';
+              li.className = 'w-full text-left px-3 py-2 text-sm text-slate-800 hover:bg-slate-100 focus:bg-slate-100 focus:outline-none border-b border-slate-100 last:border-0 block';
+              li.textContent = item.display_name;
+              li.addEventListener('click', async function () {
+                results.classList.add('hidden');
+                panel.classList.add('hidden');
+                input.value = '';
+                setGpsError('');
+                setGpsWarning('');
+                setCadastralAddress('');
+
+                const outcome = await resolveCoordinatesToCadastral(item.lat, item.lon);
+                if (outcome.error) {
+                  setGpsError(outcome.error);
+                  return;
+                }
+                $('cadastral-reference').value = outcome.reference;
+                setError('cadastral-reference', false);
+                setCadastralAddress(outcome.address);
+              });
+              results.appendChild(li);
+            });
+            results.classList.remove('hidden');
+          } catch {
+            spinner.classList.add('hidden');
+            errorEl.textContent = 'No se pudo conectar con el buscador.';
+            errorEl.classList.remove('hidden');
+          }
+        }, 400);
+      });
+
+      // Close results when clicking outside
+      document.addEventListener('click', function (e) {
+        if (!panel.contains(e.target) && e.target !== btn) {
+          results.classList.add('hidden');
+        }
+      });
+    })();
+
+    // ─── Map picker ────────────────────────────────────────────────────────────
+
+    (function initMapPicker() {
+      const mapBtn     = $('cadastral-reference-map-btn');
+      const modal      = $('map-modal');
+      const closeBtn   = $('map-modal-close');
+      const confirmBtn = $('map-modal-confirm');
+      const coordsEl   = $('map-modal-coords');
+      const errorEl    = $('map-modal-error');
+      const statusEl   = $('map-modal-status');
+
+      if (!mapBtn || !modal) return;
+
+      let leafletLoaded = false;
+      let leafletMap    = null;
+      let marker        = null;
+      // Default centre: Spain
+      const DEFAULT_LAT = 40.4;
+      const DEFAULT_LON = -3.7;
+      const DEFAULT_ZOOM = 6;
+
+      function setModalError(msg) {
+        if (!msg) { errorEl.classList.add('hidden'); errorEl.textContent = ''; return; }
+        errorEl.textContent = msg;
+        errorEl.classList.remove('hidden');
+      }
+
+      function setModalStatus(msg) {
+        if (!msg) { statusEl.classList.add('hidden'); statusEl.textContent = ''; return; }
+        statusEl.textContent = msg;
+        statusEl.classList.remove('hidden');
+      }
+
+      function updateCoordsLabel(lat, lon) {
+        coordsEl.textContent = `📍 ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+        coordsEl.classList.remove('hidden');
+      }
+
+      function loadLeaflet() {
+        return new Promise(function (resolve, reject) {
+          if (leafletLoaded) { resolve(); return; }
+
+          const css = document.createElement('link');
+          css.rel  = 'stylesheet';
+          css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+          document.head.appendChild(css);
+
+          const js = document.createElement('script');
+          js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+          js.onload  = function () { leafletLoaded = true; resolve(); };
+          js.onerror = reject;
+          document.head.appendChild(js);
+        });
+      }
+
+      function initMap() {
+        if (leafletMap) {
+          setTimeout(function () { leafletMap.invalidateSize(); }, 100);
+          return;
+        }
+
+        leafletMap = window.L.map('leaflet-map').setView([DEFAULT_LAT, DEFAULT_LON], DEFAULT_ZOOM);
+        window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          maxZoom: 19,
+        }).addTo(leafletMap);
+
+        marker = window.L.marker([DEFAULT_LAT, DEFAULT_LON], { draggable: true }).addTo(leafletMap);
+        updateCoordsLabel(DEFAULT_LAT, DEFAULT_LON);
+
+        marker.on('dragend', function () {
+          const pos = marker.getLatLng();
+          updateCoordsLabel(pos.lat, pos.lng);
+          setModalError('');
+        });
+
+        leafletMap.on('click', function (e) {
+          marker.setLatLng(e.latlng);
+          updateCoordsLabel(e.latlng.lat, e.latlng.lng);
+          setModalError('');
+        });
+      }
+
+      async function openModal() {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        setModalError('');
+        setModalStatus('Cargando mapa…');
+        confirmBtn.disabled = false;
+
+        try {
+          await loadLeaflet();
+          setModalStatus('');
+          initMap();
+        } catch {
+          setModalStatus('');
+          setModalError('No se pudo cargar el mapa. Comprueba tu conexión.');
+        }
+      }
+
+      function closeModal() {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+
+      mapBtn.addEventListener('click', openModal);
+      closeBtn.addEventListener('click', closeModal);
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+          closeModal();
+        }
+      });
+
+      confirmBtn.addEventListener('click', async function () {
+        if (!marker) return;
+
+        setModalError('');
+        confirmBtn.disabled = true;
+        setModalStatus('Buscando Referencia Catastral…');
+
+        const pos = marker.getLatLng();
+
+        try {
+          const res = await fetch('/api/cadastral-reference-from-coordinates', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ latitude: pos.lat, longitude: pos.lng }),
+          });
+          const data = await res.json().catch(() => ({}));
+
+          if (!res.ok || !data.cadastral_reference) {
+            setModalStatus('');
+            setModalError(data.error || 'No se encontró Referencia Catastral para esta ubicación.');
+            confirmBtn.disabled = false;
+            return;
+          }
+
+          closeModal();
+          setGpsError('');
+          setGpsWarning('');
+          $('cadastral-reference').value = data.cadastral_reference.toUpperCase();
+          setError('cadastral-reference', false);
+          setCadastralAddress(data.address || '');
+        } catch {
+          setModalStatus('');
+          setModalError('No se pudo conectar con el servidor.');
+          confirmBtn.disabled = false;
+        }
+      });
+    })();
   })();
 </script>
 {% endblock %}
