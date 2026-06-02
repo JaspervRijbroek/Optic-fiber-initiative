@@ -185,7 +185,7 @@ final class RegistrationController extends AbstractController
             return $this->json(['error' => 'La búsqueda debe tener al menos 3 caracteres.'], Response::HTTP_BAD_REQUEST);
         }
 
-        $userAgent = $this->nominatimUserAgent ?: 'OpticFiber/1.0';
+        $userAgent = $this->nominatimUserAgent;
 
         try {
             $response = $this->httpClient->request('GET', 'https://nominatim.openstreetmap.org/search', [
