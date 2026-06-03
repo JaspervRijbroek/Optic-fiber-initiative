@@ -58,6 +58,7 @@ final class ExportController extends AbstractController
                 $zipcode = '';
                 $city = '';
 
+                // The Catastro API does not provide a batch endpoint; one request per registration is required.
                 try {
                     $addressData = $this->cadastralReferenceService->resolveAddressDataFromReference(
                         $registration->getCadastralReference()
