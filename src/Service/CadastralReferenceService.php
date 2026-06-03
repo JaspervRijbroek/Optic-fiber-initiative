@@ -38,7 +38,7 @@ final class CadastralReferenceService
      * @param float $lat WGS84 latitude
      * @param float $lon WGS84 longitude
      *
-     * @return array{reference: string, address: string}
+     * @return array{reference: string, address: string, zipcode: string, city: string}
      *
      * @throws CadastralReferenceNotFoundException when no cadastral parcel exists at the given coordinates
      * @throws CadastralReferenceException         when the Catastro API returns an error, the building
@@ -66,6 +66,28 @@ final class CadastralReferenceService
         $data = $this->fetchBuildingUnitData($parcelRef);
 
         return $data['address'];
+    }
+
+    /**
+     * Resolves structured address data for a known 20-character cadastral reference.
+     *
+     * Returns the street address, zipcode, and city parsed from the Catastro ldt field.
+     *
+     * @return array{address: string, zipcode: string, city: string}
+     *
+     * @throws CadastralReferenceException when the API call fails or the response cannot be parsed
+     */
+    public function resolveAddressDataFromReference(string $cadastralReference): array
+    {
+        $parcelRef = substr($cadastralReference, 0, 14);
+
+        $data = $this->fetchBuildingUnitData($parcelRef);
+
+        return [
+            'address' => $data['address'],
+            'zipcode' => $data['zipcode'],
+            'city'    => $data['city'],
+        ];
     }
 
     /**
@@ -143,7 +165,7 @@ final class CadastralReferenceService
      *
      * Only handles single-unit buildings (<bico> response). Throws for división horizontal.
      *
-     * @return array{reference: string, address: string}
+     * @return array{reference: string, address: string, zipcode: string, city: string}
      */
     private function fetchBuildingUnitData(string $parcelRef): array
     {
@@ -219,7 +241,33 @@ final class CadastralReferenceService
 
         $address = trim((string) ($xml->bico->bi->ldt ?? ''));
 
-        return ['reference' => $reference, 'address' => $address];
+        ['address' => $streetAddress, 'zipcode' => $zipcode, 'city' => $city] = $this->parseLdt($address);
+
+        return ['reference' => $reference, 'address' => $streetAddress, 'zipcode' => $zipcode, 'city' => $city];
+    }
+
+    /**
+     * Parses a Catastro ldt (literal description) string into its components.
+     *
+     * The ldt field has the format: "[street address] [5-digit zipcode] [city] ([province])"
+     * e.g. "CL GLORIA 51 13730 SANTA CRUZ DE MUDELA (CIUDAD REAL)"
+     *
+     * Returns the original ldt as 'address' and empty strings for 'zipcode'/'city' when the
+     * format cannot be parsed.
+     *
+     * @return array{address: string, zipcode: string, city: string}
+     */
+    private function parseLdt(string $ldt): array
+    {
+        if (preg_match('/^(.*\S)\s+(\d{5})\s+(.*?)(?:\s*\([^)]*\))?\s*$/', $ldt, $matches)) {
+            return [
+                'address' => $matches[1],
+                'zipcode' => $matches[2],
+                'city'    => $matches[3],
+            ];
+        }
+
+        return ['address' => $ldt, 'zipcode' => '', 'city' => ''];
     }
 
     /**
