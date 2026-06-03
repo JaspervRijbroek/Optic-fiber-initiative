@@ -32,7 +32,6 @@ final class RegistrationController extends AbstractController
         private readonly LoggerInterface $logger,
         private readonly string $siteUrl,
         private readonly ?string $turnstileSecretKey,
-        private readonly string $nominatimUserAgent = 'OpticFiber/1.0',
     ) {}
 
     #[Route('/register', name: 'api_register', methods: ['POST', 'OPTIONS'])]
@@ -170,57 +169,6 @@ final class RegistrationController extends AbstractController
         }
 
         return $this->json(['address' => $address], Response::HTTP_OK);
-    }
-
-    #[Route('/address-search', name: 'api_address_search', methods: ['GET', 'OPTIONS'])]
-    public function addressSearch(Request $request): JsonResponse
-    {
-        if ($request->isMethod('OPTIONS')) {
-            return $this->corsResponse();
-        }
-
-        $q = trim((string) $request->query->get('q', ''));
-
-        if (mb_strlen($q) < 3) {
-            return $this->json(['error' => 'La búsqueda debe tener al menos 3 caracteres.'], Response::HTTP_BAD_REQUEST);
-        }
-
-        $userAgent = $this->nominatimUserAgent;
-
-        try {
-            $response = $this->httpClient->request('GET', 'https://nominatim.openstreetmap.org/search', [
-                'query' => [
-                    'q' => $q,
-                    'format' => 'json',
-                    'countrycodes' => 'es',
-                    'addressdetails' => '0',
-                    'limit' => '5',
-                ],
-                'headers' => [
-                    'User-Agent' => $userAgent,
-                    'Accept-Language' => 'es',
-                ],
-                'timeout' => 10,
-            ]);
-
-            $results = $response->toArray(false);
-        } catch (\Throwable $e) {
-            $this->logger->warning('Nominatim address search failed.', ['exception' => $e, 'q' => $q]);
-
-            return $this->json(['error' => 'No se pudo realizar la búsqueda de dirección.'], Response::HTTP_BAD_GATEWAY);
-        }
-
-        if (!is_array($results)) {
-            return $this->json([], Response::HTTP_OK);
-        }
-
-        $simplified = array_map(static fn (array $item): array => [
-            'display_name' => (string) ($item['display_name'] ?? ''),
-            'lat' => (string) ($item['lat'] ?? ''),
-            'lon' => (string) ($item['lon'] ?? ''),
-        ], $results);
-
-        return $this->json($simplified, Response::HTTP_OK);
     }
 
     private function verifyTurnstile(string $token, ?string $ip): bool
